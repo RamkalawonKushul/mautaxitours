@@ -2,7 +2,7 @@ class CreatePayments < ActiveRecord::Migration[8.0]
   def change
     create_table :payments do |t|
       t.references :booking, null: false, foreign_key: true
-      t.string :provider, null: false, default: "maubank"
+      t.string :provider, null: false, default: "sbm"
       t.string :status, null: false, default: "initiated"
       t.string :currency, null: false
       t.integer :amount_cents, null: false
