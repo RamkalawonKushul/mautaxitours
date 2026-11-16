@@ -3,7 +3,7 @@ module Api
     module Admin
       class VehicleOptionsController < BaseController
         def index
-          render json: VehicleOption.order(:capacity, :upgrade_cents)
+          render json: VehicleOption.active
         end
 
         def create
