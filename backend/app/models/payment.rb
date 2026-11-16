@@ -11,7 +11,7 @@ class Payment < ApplicationRecord
     refunded: "refunded"
   }
 
-  validates :provider, inclusion: { in: %w[maubank] }
+  validates :provider, inclusion: { in: %w[sbm] }
   validates :currency, inclusion: { in: %w[MUR EUR USD GBP] }
   validates :amount_cents, :base_amount_mur_cents,
             numericality: { only_integer: true, greater_than: 0 }
