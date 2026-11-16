@@ -51,10 +51,10 @@ The included Dockerfile is a starting point for a Rails-compatible host. Provisi
 
 Before production: configure HTTPS, database backups, monitoring, mail delivery, staff authentication/roles, admin audit logs, and payment-provider webhooks. A booking must never be marked paid based only on a browser redirect.
 
-## Payments (MauBank-first)
+## Payments (SBM-first)
 
-MauBank is the selected primary business bank and intended first acquiring provider. The payment foundation records payment attempts separately from bookings and includes a provider adapter contract and customer currency allowlist (MUR, EUR, USD, GBP).
+SBM is the selected primary business bank and intended first acquiring provider. The payment foundation records payment attempts separately from bookings and includes a provider adapter contract and customer currency allowlist (MUR, EUR, USD, GBP).
 
-The actual MauBank checkout/API and webhook implementation is intentionally pending the bank's merchant integration pack. Do not enable live payments until MauBank confirms merchant acquiring eligibility, supported transaction/settlement currencies, API documentation, sandbox credentials, webhook signing, fees and settlement arrangements. See [MauBank gateway onboarding](docs/maubank-gateway-onboarding.md).
+The actual SBM checkout/API and webhook implementation is intentionally pending the bank's merchant integration pack. Do not enable live payments until SBM confirms merchant acquiring eligibility, supported transaction/settlement currencies, API documentation, sandbox credentials, webhook signing, fees and settlement arrangements. See [SBM gateway onboarding](docs/sbm-gateway-onboarding.md).
 
 Foreign-currency amounts must be calculated server-side from a trusted, timestamped FX quote. Browser-provided prices or exchange rates are never authoritative. A payment is only successful after a verified server-to-server notification or authenticated transaction lookup; a customer redirect alone is not proof of payment.
