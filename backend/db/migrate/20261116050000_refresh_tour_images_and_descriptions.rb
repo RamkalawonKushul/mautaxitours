@@ -8,7 +8,7 @@ class RefreshTourImagesAndDescriptions < ActiveRecord::Migration[8.0]
     "cataileauxbenitier-details" => {
       "summary" => "Discover the west coast by catamaran, with dolphin watching, Crystal Rock, snorkelling and a beach stop at Île aux Bénitiers.",
       "description" => "Set off from Black River for a west-coast catamaran cruise. Look out for dolphins near Tamarin, stop at Crystal Rock and relax on Île aux Bénitiers, with a BBQ lunch and drinks on board.",
-      "image_url" => "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/1b/6d/ef/6e/caption.jpg?w=1200&h=-1&s=1"
+      "image_url" => "https://ileauxcerf.com/images/cdn/7c7f8be3d4ba0cf2e7f9.jpg"
     },
     "cataileauxgabriel-details" => {
       "summary" => "Spend the day sailing to Île aux Gabriel, known for its white-sand beaches, clear lagoon and excellent snorkelling.",
@@ -23,7 +23,7 @@ class RefreshTourImagesAndDescriptions < ActiveRecord::Migration[8.0]
     "swimwithdolphine" => {
       "summary" => "Head out from Tamarin Bay for a guided dolphin-watching and open-sea experience.",
       "description" => "Join a morning boat trip from Tamarin Bay to look for dolphins in their natural environment. The crew will brief guests before entering the water; sightings and swimming opportunities depend on sea conditions and responsible wildlife practices.",
-      "image_url" => "https://mauritiusexplored.com/wp-content/uploads/2019/05/Dolphin-swim-vitamin-sea.jpg"
+      "image_url" => "https://ileauxcerf.com/images/cdn/d2208522593e826715b3.jpg"
     },
     "thechamarel" => {
       "summary" => "Explore Grand Bassin, Chamarel’s Seven Coloured Earth, waterfalls, rum heritage and scenic viewpoints.",
