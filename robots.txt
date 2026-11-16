@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+Disallow: /platform/admin/
+Sitemap: https://www.mautaxitours.com/sitemap.xml
