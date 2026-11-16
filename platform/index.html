@@ -29,7 +29,7 @@
 <script>
 
 const prettyTitle=s=>s.toLowerCase().replace(/\b[a-z]/g,c=>c.toUpperCase()).replace(/\b(Aux|De|Du|Des|Et|The|And|Of)\b/g,c=>c.toLowerCase());
-const tours=window.MAUTAXI_TOURS.map(t=>({...t,name:prettyTitle(t.name),tag:t.category==='sea'?'Sea experience':t.category==='nature'?'Nature & adventure':'Private sightseeing',desc:t.description||t.overview.slice(0,150),image:t.hero,href:t.source,price:t.taxiPrice,detailUrl:'tour.html?id='+encodeURIComponent(t.id)}));
+const tourOverrides=(()=>{try{return JSON.parse(localStorage.getItem('mautaxi_tour_overrides_v1')||'{}')}catch(e){return {}}})();const tours=window.MAUTAXI_TOURS.map(t=>({...t,...(tourOverrides[t.id]||{}),name:prettyTitle((tourOverrides[t.id]||{}).name||t.name),tag:(tourOverrides[t.id]||{}).tag||(t.category==='sea'?'Sea experience':t.category==='nature'?'Nature & adventure':'Private sightseeing'),desc:(tourOverrides[t.id]||{}).description||t.description||t.overview.slice(0,150),image:(tourOverrides[t.id]||{}).hero||t.hero,href:t.source,price:(tourOverrides[t.id]||{}).taxiPrice||t.taxiPrice,detailUrl:'tour.html?id='+encodeURIComponent(t.id)}));
 let activeFilter='all',cart=(()=>{try{return JSON.parse(localStorage.getItem('mautaxi_cart_v2')||'[]')}catch(e){return []}})(),currency='EUR',savedPax=(()=>{try{return JSON.parse(localStorage.getItem('mautaxi_passengers_v1')||'{"adults":2,"children":0,"babies":0}')}catch(e){return {adults:2,children:0,babies:0}}})();
 const symbols={MUR:'Rs',EUR:'€',USD:'$',GBP:'£'};
 function toast(t){const el=document.getElementById('toast');el.textContent=t;el.style.display='block';setTimeout(()=>el.style.display='none',2600)}
@@ -38,7 +38,7 @@ function saveCart(){localStorage.setItem('mautaxi_cart_v2',JSON.stringify(cart))
 function addTour(id){const t=tours.find(x=>x.id===id);if(cart.some(x=>x.id===id)){toast(t.name+' is already in your trip');document.getElementById('openCart').click();return}cart.push({id,qty:1});saveCart();toast(t.name+' added to your trip')}
 function money(value){return '€'+Number(value||0).toFixed(2)}
 function amount(value){const n=Number.parseFloat(String(value||'').replace(/[^0-9.,]/g,'').replace(',','.'));return Number.isFinite(n)?n:0}
-const TRANSPORT_OPTIONS=[
+const DEFAULT_TRANSPORT_OPTIONS=[
  {type:'Standard Car',capacity:4,extra:0,label:'Standard Car'},
  {type:'SUV',capacity:4,extra:34,label:'SUV'},
  {type:'Family Van',capacity:7,extra:115,label:'Family Van'},
@@ -46,6 +46,7 @@ const TRANSPORT_OPTIONS=[
  {type:'Executive Minivan',capacity:14,extra:131,label:'Executive Minivan'},
  {type:'Coaster/Bus',capacity:22,extra:198,label:'Coaster / Bus'}
 ];
+const TRANSPORT_OPTIONS=(()=>{try{const v=JSON.parse(localStorage.getItem('mautaxi_vehicle_options_v1')||'null');return Array.isArray(v)&&v.length?v:DEFAULT_TRANSPORT_OPTIONS}catch(e){return DEFAULT_TRANSPORT_OPTIONS}})();
 function groupSize(){return {adults:Number(document.getElementById('cartAdults')?.value||savedPax.adults||2),children:Number(document.getElementById('cartChildren')?.value??savedPax.children??0),babies:Number(document.getElementById('cartBabies')?.value??savedPax.babies??0)}}
 function vehicleFor(item,people){const previous=Number(item.last_group_size||0);let selected=TRANSPORT_OPTIONS.find(v=>v.type===item.transportation_type);if(!selected||selected.capacity<people||previous!==people){selected=TRANSPORT_OPTIONS.find(v=>v.capacity>=people)||null;if(selected)item.transportation_type=selected.type;}item.last_group_size=people;return selected}
 function vehiclePrice(t,vehicle){return amount(t.taxiPrice)+(vehicle?.extra||0)}
