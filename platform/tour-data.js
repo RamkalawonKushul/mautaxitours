@@ -48,7 +48,7 @@ window.MAUTAXI_TOURS = [
     "baby": "FREE",
     "description": "Discover the west coast by catamaran, with dolphin watching, Crystal Rock, snorkelling and a beach stop at Île aux Bénitiers.",
     "overview": "Set off from Black River for a west-coast catamaran cruise. Look out for dolphins near Tamarin, stop at Crystal Rock and relax on Île aux Bénitiers, with a BBQ lunch and drinks on board.",
-    "hero": "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/1b/6d/ef/6e/caption.jpg?w=1200&h=-1&s=1",
+    "hero": "https://ileauxcerf.com/images/cdn/7c7f8be3d4ba0cf2e7f9.jpg",
     "included": [
       "Snorkelling",
       "BBQ buffet lunch",
@@ -144,7 +144,7 @@ window.MAUTAXI_TOURS = [
     "baby": "FREE",
     "description": "Head out from Tamarin Bay for a guided dolphin-watching and open-sea experience.",
     "overview": "Join a morning boat trip from Tamarin Bay to look for dolphins in their natural environment. The crew will brief guests before entering the water; sightings and swimming opportunities depend on sea conditions and responsible wildlife practices.",
-    "hero": "https://mauritiusexplored.com/wp-content/uploads/2019/05/Dolphin-swim-vitamin-sea.jpg",
+    "hero": "https://ileauxcerf.com/images/cdn/d2208522593e826715b3.jpg",
     "included": [
       "Boat trip and safety briefing",
       "Life jackets",
