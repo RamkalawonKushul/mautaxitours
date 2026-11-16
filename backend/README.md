@@ -47,7 +47,7 @@ Prices are calculated from database tour prices; client-submitted prices are nev
 
 ## Deployment
 
-The included Dockerfile is a starting point for a Rails-compatible host. Provision PostgreSQL and set DATABASE_URL, RAILS_ENV=production, RAILS_LOG_TO_STDOUT=1, and a comma-separated CORS_ORIGINS allowlist. Keep secrets in the host's secret manager, never in Git.
+The repository-root `render.yaml` Blueprint provisions the Rails API and PostgreSQL in Singapore. It uses the `backend/` directory as the Docker build root, runs database migrations as a pre-deploy step, and exposes `/api/v1/health` for health checks. Keep secrets in Render environment variables; never commit them to Git.
 
 Before production: configure HTTPS, database backups, monitoring, mail delivery, staff authentication/roles, admin audit logs, and payment-provider webhooks. A booking must never be marked paid based only on a browser redirect.
 
@@ -80,3 +80,20 @@ The initial seed imports the existing tour catalogue and the current vehicle cap
 - `GET /api/v1/tours`, `GET /api/v1/tours/:slug`, `GET /api/v1/vehicles` — public read-only catalogue.
 
 Tour images are currently managed by editing their HTTPS image URL. A managed image upload/storage workflow, password reset, multi-admin roles, login throttling, audit history, and full booking/payment management are not yet included. Add those controls before opening the CMS to multiple staff members. The API and database must be hosted and configured before live edits are available; the static Vercel deployment alone does not provide a Rails database.
+
+
+## Deploy on Render
+
+1. Sign in at [Render](https://dashboard.render.com/) and connect the GitHub account that can access `RamkalawonKushul/mautaxitours`.
+2. Choose **New + → Blueprint**, select the repository, and choose the `platform-modernization` branch.
+3. Render reads the root `render.yaml`. Review the proposed `mautaxi-api` web service and `mautaxi-postgres` database, their Singapore region, and their paid plans before approving. Do not approve until you are comfortable with the monthly charges.
+4. After provisioning, open the `mautaxi-api` service and check its deploy logs. The Blueprint runs `bin/rails db:migrate` before starting the API.
+5. Confirm `https://YOUR-API.onrender.com/api/v1/health` returns JSON with `"status":"ok"`.
+6. In the API service's Shell, run `bin/rails db:seed` once to load the initial tour and vehicle catalogue.
+7. In the same Shell, create the first admin with environment variables entered securely in the Shell session (do not paste the password into Git or a public chat): `ADMIN_EMAIL=your-admin-email ADMIN_PASSWORD='your-unique-password-of-at-least-14-characters' bin/rails admin:create`.
+8. Set `window.MAUTAXI_API_URL` in `platform/config.js` to the exact API base URL (for example `https://mautaxi-api.onrender.com`) and deploy the website frontend.
+9. Test the admin login, create/edit a draft tour and vehicle, and verify the public tour list and cart before using the site with customers.
+
+The Blueprint currently selects a 0.5 CPU / 512 MB web service and a 0.1 CPU / 256 MB PostgreSQL database with 5 GB storage, both in Singapore. Render's published compute prices make the starting estimate approximately US$14.20/month before taxes or any pricing changes: about US$7 for the web service, US$6 for the database compute, and about US$1.20 for the 4 GB storage above the included 1 GB. Check the current Render pricing and the exact Blueprint approval screen before creating resources.
+
+The Blueprint is pinned to `platform-modernization`; it does not merge the pull request or alter `main`. The API deploys automatically after commits to that branch. The live website remains on its existing frontend host until its API URL is configured and the frontend is redeployed.
