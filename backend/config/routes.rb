@@ -7,8 +7,8 @@ Rails.application.routes.draw do
       resources :transport_enquiries, only: %i[create]
       namespace :admin do
         post "session", to: "sessions#create"
-        resources :tours
-        resources :vehicle_options, path: "vehicles"
+        resources :tours, only: %i[index show create update destroy]
+        resources :vehicle_options, path: "vehicles", only: %i[index create update destroy]
       end
       get "vehicles", to: "vehicle_options#index"
     end
