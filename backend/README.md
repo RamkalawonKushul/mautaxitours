@@ -43,7 +43,7 @@ Booking payload example:
 }
 ```
 
-Prices are calculated from database tour prices; client-submitted prices are never trusted. New bookings start as pending/unpaid. Payment provider integration and authenticated admin operations are not enabled yet.
+Prices are calculated from database tour prices; client-submitted prices are never trusted. New bookings start as pending/unpaid. Authenticated administrator CRUD is available once the Rails API and PostgreSQL are deployed; live card payment processing remains pending SBM merchant integration.
 
 ## Deployment
 
