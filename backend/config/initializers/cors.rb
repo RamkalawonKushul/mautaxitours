@@ -3,6 +3,6 @@ origins = ENV.fetch("CORS_ORIGINS", "http://localhost:8080,http://127.0.0.1:8080
 Rails.application.config.middleware.insert_before 0, Rack::Cors do
   allow do
     origins(*origins)
-    resource "/api/*", headers: :any, methods: %i[get post options], expose: %w[Location]
+    resource "/api/*", headers: :any, methods: %i[get post put patch delete options], expose: %w[Location]
   end
 end
