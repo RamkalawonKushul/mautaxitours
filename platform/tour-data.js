@@ -81,7 +81,7 @@ window.MAUTAXI_TOURS = [
     "baby": "FREE",
     "description": "Spend the day sailing to Île aux Gabriel, known for its white-sand beaches, clear lagoon and excellent snorkelling.",
     "overview": "Depart from Grand Baie for a full-day catamaran cruise to Île aux Gabriel in the northern lagoon. Enjoy the island’s white sands, clear water, swimming and snorkelling, with time to unwind by the sea.",
-    "hero": "https://www.islandcovemu.com/wp-content/uploads/2019/12/Tour-Image-Sea-North-Coast-Catamaran-1920x674-1.jpg",
+    "hero": "https://travelhub-mu.com/wp-content/uploads/2019/07/3.jpg",
     "included": [
       "Snorkelling",
       "BBQ buffet lunch",
@@ -112,7 +112,7 @@ window.MAUTAXI_TOURS = [
     "baby": "FREE",
     "description": "Ride by speedboat to Île aux Cerfs, with a lagoon swim, waterfall visit and BBQ lunch.",
     "overview": "Depart from the east coast for an exciting speedboat ride to Île aux Cerfs. Enjoy the island’s beaches, a lagoon or snorkelling stop when conditions allow, a Grand River South East waterfall visit and BBQ lunch.",
-    "hero": "https://dynamic-media-cdn.tacdn.com/media/photo-o/2e/fd/f0/88/caption.jpg?w=800&h=600&s=1",
+    "hero": "https://cdn.getyourguide.com/img/tour/5e2567bd79156.jpeg/140.jpg",
     "included": [
       "Snorkelling",
       "BBQ buffet lunch",
