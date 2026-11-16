@@ -7,7 +7,7 @@ This guide covers the account and business-owner steps that cannot be completed 
 1. Open Google Search Console and add a **Domain** property for `mautaxitours.com`.
 2. Copy the TXT verification record Google gives you and add it to the domain's DNS records.
 3. Complete verification, then submit `https://www.mautaxitours.com/sitemap.xml`.
-4. Use URL Inspection for the homepage, airport-transfer page, private-tour page, and several important tour pages. Request indexing after the public website is deployed.
+4. Use URL Inspection for the homepage and the direct interactive tour URLs (`/platform/tour.html?id=...`). Request indexing after the public website is deployed. Tour detail pages carry their own titles, descriptions, canonical URLs and TouristTrip structured data; older duplicate tour URLs are marked noindex and canonicalised to the direct booking pages.
 5. Check Page indexing, Core Web Vitals, HTTPS, and Mobile Usability reports regularly. Fix errors rather than repeatedly requesting indexing.
 
 ## 2. Google Business Profile
@@ -42,7 +42,7 @@ Start with tightly targeted, high-intent campaigns after the website is live:
 - Ile aux Gabriel catamaran trips
 - Group transport Mauritius
 
-Use dedicated landing pages, location targeting relevant to likely visitors, negative keywords, and a clear daily budget. Measure qualified enquiries and confirmed bookings, not just clicks. Do not advertise prices or inclusions that are not currently honoured.
+Send each ad to the most relevant existing tour or service page in the same direct booking journey. Use location targeting relevant to likely visitors, negative keywords, and a clear daily budget. Measure qualified enquiries and confirmed bookings, not just clicks. Do not advertise prices or inclusions that are not currently honoured.
 
 ## 5. Content and trust
 
@@ -55,7 +55,7 @@ Use dedicated landing pages, location targeting relevant to likely visitors, neg
 ## 6. Technical release checks
 
 - Deploy the reviewed `platform-modernization` branch only after owner approval.
-- Verify the custom domain serves the intended homepage and clean tour URLs over HTTPS.
+- Verify the custom domain serves the intended homepage and direct interactive tour URLs over HTTPS.
 - Test every tour link, image, WhatsApp action, booking enquiry, mobile layout and form on real devices.
 - Recheck the sitemap and robots file on the live domain.
 - The Rails API, booking database, administrator CMS and SBM card checkout must be deployed and tested separately before describing online card payment or instant booking as available.
