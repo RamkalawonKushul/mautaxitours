@@ -49,3 +49,11 @@ Prices are calculated from database tour prices; client-submitted prices are nev
 The included Dockerfile is a starting point for a Rails-compatible host. Provision PostgreSQL and set DATABASE_URL, RAILS_ENV=production, RAILS_LOG_TO_STDOUT=1, and a comma-separated CORS_ORIGINS allowlist. Keep secrets in the host's secret manager, never in Git.
 
 Before production: configure HTTPS, database backups, monitoring, mail delivery, staff authentication/roles, admin audit logs, and payment-provider webhooks. A booking must never be marked paid based only on a browser redirect.
+
+## Payments (MauBank-first)
+
+MauBank is the selected primary business bank and intended first acquiring provider. The payment foundation records payment attempts separately from bookings and includes a provider adapter contract and customer currency allowlist (MUR, EUR, USD, GBP).
+
+The actual MauBank checkout/API and webhook implementation is intentionally pending the bank's merchant integration pack. Do not enable live payments until MauBank confirms merchant acquiring eligibility, supported transaction/settlement currencies, API documentation, sandbox credentials, webhook signing, fees and settlement arrangements. See [MauBank gateway onboarding](docs/maubank-gateway-onboarding.md).
+
+Foreign-currency amounts must be calculated server-side from a trusted, timestamped FX quote. Browser-provided prices or exchange rates are never authoritative. A payment is only successful after a verified server-to-server notification or authenticated transaction lookup; a customer redirect alone is not proof of payment.
