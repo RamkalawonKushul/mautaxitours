@@ -1,10 +1,10 @@
 # MauTaxi Tours API (Rails + PostgreSQL)
 
-This is the backend foundation for the booking platform. The existing static customer website remains at the repository root while the Rails API is developed separately under `backend/`.
+The Rails API is being developed separately from the existing static customer website. This keeps the current production site untouched while the new platform is built and tested.
 
 ## Requirements
 
-- Ruby 3.2+
+- Ruby 3.3.6 (or compatible Ruby 3.3)
 - PostgreSQL 14+
 - Bundler
 
@@ -13,28 +13,39 @@ This is the backend foundation for the booking platform. The existing static cus
 ```sh
 cd backend
 bundle install
-cp .env.example .env
-bin/rails db:create db:migrate
+export DATABASE_URL=postgresql://localhost/mautaxi_development
+bin/rails db:prepare
 bin/rails server -p 3000
 ```
-
-Set `DATABASE_URL` in your environment to a PostgreSQL connection string. Do not commit credentials or payment secrets.
 
 ## API
 
 - `GET /api/v1/health` — service health
 - `GET /api/v1/tours` — published tours
 - `GET /api/v1/tours/:slug` — one published tour
-- `POST /api/v1/bookings` — create a pending booking from published tour IDs and quantities
+- `POST /api/v1/bookings` — create a pending booking
 - `GET /api/v1/bookings/:reference` — retrieve booking summary
 
-Prices are calculated from database tour prices; client-submitted prices are never trusted. New bookings start as pending/unpaid. Payment provider integration and authenticated admin operations are intentionally not enabled until the provider and production hosting are configured.
+Booking payload example:
 
-## Production checklist
+```json
+{
+  "booking": {
+    "customer_name": "Example Guest",
+    "customer_email": "guest@example.com",
+    "customer_phone": "+230 5xxxxxxx",
+    "travel_date": "2027-04-15",
+    "pickup_details": "Hotel name / pickup point",
+    "special_requests": "Child seat required"
+  },
+  "items": [{ "tour_id": 1, "quantity": 2 }]
+}
+```
 
-1. Provision managed PostgreSQL and a Rails-compatible host.
-2. Configure `DATABASE_URL`, `RAILS_MASTER_KEY`, `RAILS_ENV=production`, and `RAILS_LOG_TO_STDOUT=1` as secrets.
-3. Run migrations and configure HTTPS, backups, monitoring, and mail delivery.
-4. Add authenticated staff/admin access before exposing management operations.
-5. Integrate a Mauritius-supported payment provider using signed server-side webhooks. Never mark a booking paid from a browser redirect alone.
-6. Connect the existing website only after end-to-end staging tests.
+Prices are calculated from database tour prices; client-submitted prices are never trusted. New bookings start as pending/unpaid. Payment provider integration and authenticated admin operations are not enabled yet.
+
+## Deployment
+
+The included Dockerfile is a starting point for a Rails-compatible host. Provision PostgreSQL and set DATABASE_URL, RAILS_ENV=production, RAILS_LOG_TO_STDOUT=1, and a comma-separated CORS_ORIGINS allowlist. Keep secrets in the host's secret manager, never in Git.
+
+Before production: configure HTTPS, database backups, monitoring, mail delivery, staff authentication/roles, admin audit logs, and payment-provider webhooks. A booking must never be marked paid based only on a browser redirect.
