@@ -3,12 +3,17 @@ module Api
     class ToursController < ApplicationController
       def index
         tours = Tour.published.order(:name)
-        render json: tours.as_json(only: %i[id name slug summary description image_url duration_minutes price_cents currency])
+        render json: tours.map { |tour| serialize(tour) }
       end
 
       def show
-        tour = Tour.published.find_by!(slug: params[:id])
-        render json: tour.as_json(only: %i[id name slug summary description image_url duration_minutes price_cents currency])
+        render json: serialize(Tour.published.find_by!(slug: params[:id]))
+      end
+
+      private
+
+      def serialize(tour)
+        tour.as_json(only: %i[id name slug summary description image_url duration_minutes price_cents currency area category_key adult_price_cents child_price_cents baby_price_label included_items excluded_items itinerary])
       end
     end
   end
