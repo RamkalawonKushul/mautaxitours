@@ -12,7 +12,7 @@ class PaymentTest < ActiveSupport::TestCase
     assert_raises(ArgumentError) { PaymentGateway::CurrencyPolicy.validate!("AUD") }
   end
 
-  test "gateway adapter fails closed until MauBank credentials and contract are configured" do
+  test "gateway adapter fails closed until SBM merchant credentials and contract are configured" do
     adapter = PaymentGateway::Adapter.new
     assert_raises(PaymentGateway::Adapter::NotConfigured) do
       adapter.create_checkout_session(payment: Object.new)
