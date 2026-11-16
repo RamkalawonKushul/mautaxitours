@@ -25,6 +25,7 @@ bin/rails server -p 3000
 - `GET /api/v1/tours/:slug` — one published tour
 - `POST /api/v1/bookings` — create a pending booking
 - `GET /api/v1/bookings/:reference` — retrieve booking summary
+- `POST /api/v1/transport_enquiries` — create an airport/private transport enquiry (no fare is quoted automatically)
 
 Booking payload example:
 
