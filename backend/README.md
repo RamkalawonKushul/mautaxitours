@@ -58,3 +58,25 @@ SBM is the selected primary business bank and intended first acquiring provider.
 The actual SBM checkout/API and webhook implementation is intentionally pending the bank's merchant integration pack. Do not enable live payments until SBM confirms merchant acquiring eligibility, supported transaction/settlement currencies, API documentation, sandbox credentials, webhook signing, fees and settlement arrangements. See [SBM gateway onboarding](docs/sbm-gateway-onboarding.md).
 
 Foreign-currency amounts must be calculated server-side from a trusted, timestamped FX quote. Browser-provided prices or exchange rates are never authoritative. A payment is only successful after a verified server-to-server notification or authenticated transaction lookup; a customer redirect alone is not proof of payment.
+
+
+## Administrator CMS setup
+
+The live administrator editor is served at `/platform/admin/`. It requires the Rails API to be deployed separately over HTTPS and its URL entered on the sign-in screen.
+
+1. Provision PostgreSQL and deploy the `backend/` Rails application.
+2. Set `DATABASE_URL`, `RAILS_MASTER_KEY` (if encrypted credentials are used), `SECRET_KEY_BASE`, `RAILS_ENV=production`, and `CORS_ORIGINS` to the exact HTTPS website origins (for example `https://mautaxitours.com,https://www.mautaxitours.com`).
+3. Deploy the API, run `bin/rails db:migrate db:seed` from `backend/`.
+4. Create the first administrator securely on the host: `ADMIN_EMAIL=admin@example.com ADMIN_PASSWORD='use-a-long-unique-password' bin/rails admin:create`. Do not put the password in Git or a public chat.
+5. Open `/platform/admin/`, enter the API base URL and the administrator credentials.
+
+The initial seed imports the existing tour catalogue and the current vehicle capacities / upgrade surcharges. Seed runs do not overwrite tours that have already been created, so later administrator edits are retained.
+
+### Administrator API
+
+- `POST /api/v1/admin/session` — authenticate and receive a signed 12-hour bearer token.
+- `GET/POST /api/v1/admin/tours`, `GET/PATCH/DELETE /api/v1/admin/tours/:id` — manage tours; delete archives rather than physically deleting booking history.
+- `GET/POST /api/v1/admin/vehicles`, `PATCH/DELETE /api/v1/admin/vehicles/:id` — manage fleet and upgrade prices.
+- `GET /api/v1/tours`, `GET /api/v1/tours/:slug`, `GET /api/v1/vehicles` — public read-only catalogue.
+
+Tour images are currently managed by editing their HTTPS image URL. A managed image upload/storage workflow, password reset, multi-admin roles, login throttling, audit history, and full booking/payment management are not yet included. Add those controls before opening the CMS to multiple staff members. The API and database must be hosted and configured before live edits are available; the static Vercel deployment alone does not provide a Rails database.
