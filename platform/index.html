@@ -60,7 +60,34 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 .tour-actions .add-trip-btn:hover{background:#2f68b2;transform:translateY(-1px)}
 @media(max-width:600px){.tour-img{height:205px}.tour-content{padding:15px}.tour h3{font-size:17px}.tour p{max-height:36px}.tour-bottom{padding-top:11px}.price-stack strong{font-size:18px}.tour-actions .add-trip-btn{min-height:42px;padding:10px 13px!important;font-size:12px}}
 
- .tour-img.image-unavailable{background:linear-gradient(135deg,#e6eef7,#cbd9e8)}.tour-img.image-unavailable:after{content:'Photo unavailable';position:absolute;inset:0;display:grid;place-items:center;color:#53677d;font-size:13px;font-weight:700}\n</style></head><body>
+ .tour-img.image-unavailable{background:linear-gradient(135deg,#e6eef7,#cbd9e8)}.tour-img.image-unavailable:after{content:'Photo unavailable';position:absolute;inset:0;display:grid;place-items:center;color:#53677d;font-size:13px;font-weight:700}\n
+/* Responsive finishing pass: balanced FAQ columns and tablet card sizing */
+.faq-grid{display:block;column-count:2;column-gap:14px;column-fill:balance}
+.faq-grid details{display:inline-block;width:100%;break-inside:avoid;vertical-align:top;margin:0 0 14px;align-self:start}
+.faq-grid details[open]{height:auto}
+.faq-grid summary{align-items:flex-start;line-height:1.45}
+.faq-grid p{line-height:1.65}
+@media(max-width:760px){
+  .faq-grid{column-count:1}
+  .tour-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}
+  .tour-img{height:clamp(155px,27vw,205px)}
+  .tour-content{padding:14px}
+  .tour h3{font-size:16px}
+  .tour-bottom{align-items:flex-start;flex-direction:column;gap:12px}
+  .tour-actions{width:100%;align-items:stretch;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .tour-actions a,.tour-actions button{justify-content:center;text-align:center;min-height:42px}
+  .searchbar{gap:10px}
+}
+@media(max-width:560px){
+  .tour-grid{grid-template-columns:1fr;gap:16px}
+  .tour-img{height:clamp(190px,58vw,245px)}
+  .tour-content{padding:16px}
+  .tour-bottom{flex-direction:row;align-items:flex-end}
+  .tour-actions{width:auto;display:flex;align-items:flex-end}
+  .tour-actions .add-trip-btn{min-height:42px}
+  .faq-grid{column-count:1}
+}
+</style></head><body>
 <div class="announce">Mauritius island experiences · private transfers · local expertise</div>
 <header class="header"><a class="brand" href="index.html" aria-label="MauTaxi Tours home"><img class="brand-logo" src="../assets/images/logo11.png" alt="MauTaxi Tours"><span class="brand-caption">Discover Mauritius</span></a><nav class="navlinks" id="navlinks"><a href="#tours">Explore tours</a><a href="#transfers">Transfers</a><a href="#why">Why MauTaxi</a><a href="#contact">Contact</a></nav><div class="nav-actions"><button class="btn dark cart-btn" id="openCart" type="button" aria-label="Open your itinerary cart" aria-controls="cartBackdrop" aria-expanded="false">Your cart <span class="count" id="cartCount">0</span></button><button class="menu-toggle" id="menuToggle" type="button" aria-label="Open navigation menu" aria-controls="navlinks" aria-expanded="false">☰</button></div></header>
 <section class="hero"><div class="hero-inner"><div class="eyebrow">Trusted Since 2000 · First of the Millennium</div><h1>See Mauritius<br>the way it should be.</h1><p>Private island tours, unforgettable ocean experiences and reliable airport transfers — made easy with local people who know the island.</p><div class="hero-ctas"><a class="btn" href="#tours">Explore experiences <span>→</span></a><a class="btn white" href="#transfers">Plan your transfer</a></div><div class="trustline"><span>Local island knowledge</span><span>Private & flexible journeys</span><span>Personal assistance</span></div></div></section>
@@ -126,8 +153,15 @@ document.getElementById('transferForm').onsubmit=async e=>{e.preventDefault();co
 
 renderTours();saveCart();if(new URLSearchParams(location.search).get('cart')==='1')showModal('cartBackdrop');async function loadLiveCatalogue(){if(!window.MAUTAXI_API_URL)return;try{const base=window.MAUTAXI_API_URL.replace(/\/$/,''),[tourResponse,vehicleResponse]=await Promise.all([fetch(base+'/api/v1/tours'),fetch(base+'/api/v1/vehicles')]);if(!tourResponse.ok||!vehicleResponse.ok)throw new Error('Catalogue API unavailable');const records=await tourResponse.json(),vehicles=await vehicleResponse.json();if(Array.isArray(records)&&records.length){const mapped=records.map(t=>({id:t.slug,name:prettyTitle(t.name),category:t.category_key||'culture',duration:t.duration_minutes?Math.floor(t.duration_minutes/60)+'h'+(t.duration_minutes%60?' '+t.duration_minutes%60+'m':''):'Duration on request',area:t.area||'Mauritius',taxiPrice:(t.currency==='EUR'?'€':t.currency+' ')+(Number(t.price_cents)/100).toFixed(2),adult:t.adult_price_cents==null?'':(t.currency==='EUR'?'€':t.currency+' ')+(Number(t.adult_price_cents)/100).toFixed(2),child:t.child_price_cents==null?'':(t.currency==='EUR'?'€':t.currency+' ')+(Number(t.child_price_cents)/100).toFixed(2),baby:t.baby_price_label||'',description:t.summary||'',overview:t.description||'',hero:t.image_url||'',image:t.image_url||'',included:t.included_items||[],excluded:t.excluded_items||[],itinerary:t.itinerary||[],tag:t.category_key==='sea'?'Sea experience':t.category_key==='nature'?'Nature & adventure':'Private sightseeing',desc:t.summary||'',detailUrl:'tour.html?id='+encodeURIComponent(t.slug)}));tours.splice(0,tours.length,...mapped)}if(Array.isArray(vehicles)&&vehicles.length){TRANSPORT_OPTIONS=vehicles.map(v=>({type:v.name,capacity:v.capacity,extra:Number(v.upgrade_cents)/100,label:v.name}))}renderTours();renderCart()}catch(error){console.warn('MauTaxi live catalogue not loaded; showing bundled catalogue.',error)}}loadLiveCatalogue();
 
-// Keep the FAQ accordion to one expanded answer at a time.
+// Keep one FAQ answer open; clicking elsewhere dismisses the open answer.
 document.querySelectorAll('.faq-grid details').forEach(item=>item.addEventListener('toggle',()=>{if(item.open)document.querySelectorAll('.faq-grid details').forEach(other=>{if(other!==item)other.open=false})}));
+document.addEventListener('click',event=>{
+  if(!event.target.closest('.faq-grid')) document.querySelectorAll('.faq-grid details[open]').forEach(item=>{item.open=false});
+  const nav=document.getElementById('navlinks'),toggle=document.getElementById('menuToggle');
+  if(nav&&toggle&&nav.classList.contains('show')&&!event.target.closest('#navlinks')&&!event.target.closest('#menuToggle')){
+    nav.classList.remove('show');toggle.setAttribute('aria-expanded','false');toggle.setAttribute('aria-label','Open navigation menu');
+  }
+});
 
 </script>
 </body></html>
