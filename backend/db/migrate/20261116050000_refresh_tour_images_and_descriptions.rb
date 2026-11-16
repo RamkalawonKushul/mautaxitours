@@ -58,7 +58,7 @@ class RefreshTourImagesAndDescriptions < ActiveRecord::Migration[8.0]
     "portlouiscitytours" => {
       "summary" => "Explore Port Louis, including Caudan Waterfront, Chinatown, the central market and historic Fort Adelaide.",
       "description" => "Discover the capital on a private city tour. Visit Marie Reine de la Paix, Caudan Waterfront, Chinatown and the central market, then enjoy panoramic views from Fort Adelaide; museum and oceanarium visits can be arranged separately.",
-      "image_url" => "https://upload.wikimedia.org/wikipedia/commons/c/c0/Fort_Adelaide_Port_Louis_2019-09-27_2.jpg"
+      "image_url" => "https://www.mauritiustourtravels.com/wp-content/uploads/2023/08/Exploring-Port-Louis-A-Journey-Through-Mauritius-Vibrant-Capital.jpg"
     }
   }.freeze
 
