@@ -5,6 +5,12 @@ Rails.application.routes.draw do
       resources :tours, only: %i[index show]
       resources :bookings, only: %i[create show]
       resources :transport_enquiries, only: %i[create]
+      namespace :admin do
+        post "session", to: "sessions#create"
+        resources :tours
+        resources :vehicle_options, path: "vehicles"
+      end
+      get "vehicles", to: "vehicle_options#index"
     end
   end
 end
