@@ -65,7 +65,7 @@ Foreign-currency amounts must be calculated server-side from a trusted, timestam
 The live administrator editor is served at `/platform/admin/`. It requires the Rails API to be deployed separately over HTTPS and its URL entered on the sign-in screen. After the API is hosted, set `window.MAUTAXI_API_URL` in `platform/config.js` to the same API base URL and redeploy the static website; otherwise the public website continues using its bundled catalogue.
 
 1. Provision PostgreSQL and deploy the `backend/` Rails application.
-2. Set `DATABASE_URL`, `RAILS_MASTER_KEY` (if encrypted credentials are used), `SECRET_KEY_BASE`, `RAILS_ENV=production`, and `CORS_ORIGINS` to the exact HTTPS website origins (for example `https://mautaxitours.com,https://www.mautaxitours.com`).
+2. Set `DATABASE_URL`, `RAILS_MASTER_KEY` (if encrypted credentials are used), `SECRET_KEY_BASE`, `RAILS_ENV=production`, and `CORS_ORIGINS` to the exact HTTPS website origins (for example `https://mautaxitours.com,https://www.mautaxitours.com,https://mautaxitours.vercel.app`).
 3. Deploy the API, run `bin/rails db:migrate db:seed` from `backend/`.
 4. Create the first administrator securely on the host: `ADMIN_EMAIL=admin@example.com ADMIN_PASSWORD='use-a-long-unique-password' bin/rails admin:create`. Do not put the password in Git or a public chat.
 5. Open `/platform/admin/`, enter the API base URL and the administrator credentials.
