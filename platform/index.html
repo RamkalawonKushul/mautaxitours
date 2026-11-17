@@ -124,6 +124,41 @@ body:has(#cartBackdrop.open) #openCart.cart-btn,body.cart-open #openCart.cart-bt
 #openCart.cart-btn svg{display:block!important;width:23px!important;height:23px!important;max-width:23px!important;max-height:23px!important;stroke:#fff!important;fill:none!important;stroke-width:1.8!important;pointer-events:none!important}
 #openCart.cart-btn .count{position:absolute!important;top:-3px!important;right:-3px!important;display:grid!important;place-items:center!important;min-width:20px!important;height:20px!important;padding:0 5px!important;margin:0!important;border:2px solid #fff!important;border-radius:50px!important;background:#e6b45c!important;color:#102b46!important;font-size:10px!important;font-weight:800!important;line-height:1!important}
 @media(max-width:600px){#openCart.cart-btn{right:17px!important;bottom:calc(17px + env(safe-area-inset-bottom))!important;width:52px!important;height:52px!important;min-width:52px!important;min-height:52px!important}}
+
+/* Mobile consistency: My Trip button, cart sheet and booking-details sheet */
+@media(max-width:600px){
+  #openCart.cart-btn,#tourCartFab.tour-cart-fab{
+    right:17px!important;left:auto!important;bottom:calc(17px + env(safe-area-inset-bottom))!important;
+    top:auto!important;width:52px!important;height:52px!important;min-width:52px!important;min-height:52px!important;
+    border-radius:50%!important;background:#102b46!important;display:grid!important;place-items:center!important;
+  }
+  #cartBackdrop .tour-cart-modal,#checkoutBackdrop .modal{
+    width:100%!important;max-width:none!important;height:min(88dvh,760px)!important;
+    max-height:min(88dvh,760px)!important;min-height:min(88dvh,760px)!important;
+    margin:0!important;border-radius:22px 22px 0 0!important;
+    padding:20px 18px calc(20px + env(safe-area-inset-bottom))!important;
+    transform:translateY(24px) scale(.99)!important;opacity:.98!important;
+    transition:transform .26s cubic-bezier(.2,.75,.25,1),opacity .22s ease!important;
+    overflow-y:auto!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important;
+  }
+  #cartBackdrop.open .tour-cart-modal,#checkoutBackdrop.open .modal{
+    transform:translateY(0) scale(1)!important;opacity:1!important;
+  }
+  #cartBackdrop .tour-cart-items{max-height:30dvh;overflow-y:auto}
+  #cartBackdrop .tour-cart-actions{gap:10px}
+  #cartBackdrop .tour-cart-actions button,#checkoutBackdrop #checkoutForm>button[type=submit]{
+    min-height:48px!important;border-radius:10px!important;font:800 12px "DM Sans",sans-serif!important;
+  }
+  #checkoutBackdrop #checkoutForm>button[type=submit]{
+    display:flex!important;align-items:center!important;justify-content:center!important;
+    background:#102b46!important;color:#fff!important;border:0!important;width:100%!important;
+    padding:13px 18px!important;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  #cartBackdrop .tour-cart-modal,#checkoutBackdrop .modal{transition:none!important}
+}
+
 </style></head><body>
 <div class="announce">Mauritius island experiences · private transfers · local expertise</div>
 <header class="header"><a class="brand" href="index.html" aria-label="MauTaxi Tours home"><img class="brand-logo" src="../assets/images/logo11.png" alt="MauTaxi Tours"><span class="brand-caption">Discover Mauritius</span></a><nav class="navlinks" id="navlinks"><a href="#tours">Explore tours</a><a href="#transfers">Transfers</a><a href="#why">Why MauTaxi</a><a href="#contact">Contact</a></nav><div class="nav-actions"><button class="btn dark cart-btn" id="openCart" type="button" aria-label="Open My Trip" title="My Trip" aria-controls="cartBackdrop" aria-expanded="false"><svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h2l2.2 11.2a2 2 0 0 0 2 1.6h8.9a2 2 0 0 0 1.9-1.4L22 8H6"/><circle cx="10" cy="21" r="1"/><circle cx="18" cy="21" r="1"/></svg><span class="count" id="cartCount">0</span></button><button class="menu-toggle" id="menuToggle" type="button" aria-label="Open navigation menu" aria-controls="navlinks" aria-expanded="false">☰</button></div></header>
