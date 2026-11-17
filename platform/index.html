@@ -159,6 +159,19 @@ body:has(#cartBackdrop.open) #openCart.cart-btn,body.cart-open #openCart.cart-bt
   #cartBackdrop .tour-cart-modal,#checkoutBackdrop .modal{transition:none!important}
 }
 
+
+/* Floating My Trip: icon only, no legacy Cart pseudo-label */
+#openCart.cart-btn:before,#tourCartFab.tour-cart-fab:before{content:none!important;display:none!important}
+#openCart.cart-btn>svg,#tourCartFab.tour-cart-fab>.fab-icon{display:block!important;visibility:visible!important;opacity:1!important;flex:none!important}
+@keyframes myTripAddedPulse{0%{transform:scale(1)}28%{transform:scale(1.16)}55%{transform:scale(.96)}78%{transform:scale(1.07)}100%{transform:scale(1)}}
+@keyframes myTripBadgePop{0%{transform:scale(.55)}65%{transform:scale(1.28)}100%{transform:scale(1)}}
+.my-trip-added{animation:myTripAddedPulse .58s cubic-bezier(.2,.8,.25,1)}
+.my-trip-added .count,.my-trip-added .fab-count{animation:myTripBadgePop .48s ease}
+.my-trip-feedback{position:fixed;z-index:1500;left:50%;bottom:calc(88px + env(safe-area-inset-bottom));transform:translate(-50%,12px);display:flex;align-items:center;gap:9px;max-width:calc(100vw - 32px);padding:12px 17px;border:1px solid #ffffff20;border-radius:14px;background:#102b46;color:#fff;box-shadow:0 12px 32px #071b2d38;font:700 13px "DM Sans",sans-serif;opacity:0;pointer-events:none;transition:opacity .22s ease,transform .22s ease;white-space:nowrap}
+.my-trip-feedback:before{content:"✓";display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#e6b45c;color:#102b46;font-weight:900}
+.my-trip-feedback.show{opacity:1;transform:translate(-50%,0)}
+@media(max-width:600px){.my-trip-feedback{bottom:calc(82px + env(safe-area-inset-bottom));font-size:12px}}
+@media(prefers-reduced-motion:reduce){.my-trip-added,.my-trip-added .count,.my-trip-added .fab-count{animation:none}.my-trip-feedback{transition:none}}
 </style></head><body>
 <div class="announce">Mauritius island experiences · private transfers · local expertise</div>
 <header class="header"><a class="brand" href="index.html" aria-label="MauTaxi Tours home"><img class="brand-logo" src="../assets/images/logo11.png" alt="MauTaxi Tours"><span class="brand-caption">Discover Mauritius</span></a><nav class="navlinks" id="navlinks"><a href="#tours">Explore tours</a><a href="#transfers">Transfers</a><a href="#why">Why MauTaxi</a><a href="#contact">Contact</a></nav><div class="nav-actions"><button class="btn dark cart-btn" id="openCart" type="button" aria-label="Open My Trip" title="My Trip" aria-controls="cartBackdrop" aria-expanded="false"><svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h2l2.2 11.2a2 2 0 0 0 2 1.6h8.9a2 2 0 0 0 1.9-1.4L22 8H6"/><circle cx="10" cy="21" r="1"/><circle cx="18" cy="21" r="1"/></svg><span class="count" id="cartCount">0</span></button><button class="menu-toggle" id="menuToggle" type="button" aria-label="Open navigation menu" aria-controls="navlinks" aria-expanded="false">☰</button></div></header>
@@ -182,7 +195,7 @@ const symbols={MUR:'Rs',EUR:'€',USD:'$',GBP:'£'};
 function toast(t){const el=document.getElementById('toast');el.textContent=t;el.style.display='block';setTimeout(()=>el.style.display='none',2600)}
 function renderTours(){const q=(document.getElementById('searchInput').value||'').toLowerCase();const cat=document.getElementById('categorySelect').value;const list=tours.filter(t=>(activeFilter==='all'||t.category===activeFilter)&&(cat==='all'||t.category===cat)&&(!q||(t.name+' '+t.desc+' '+t.area).toLowerCase().includes(q)));document.getElementById('tourGrid').innerHTML=list.map(t=>'<article class="tour"><a href="'+t.detailUrl+'" aria-label="View '+t.name+'"><div class="tour-img"><img src="'+t.image+'" alt="'+t.name.replace(/"/g,'&quot;')+'" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.onerror=null;this.style.display=&quot;none&quot;;this.parentElement.classList.add(&quot;image-unavailable&quot;)"><span class="tour-tag">'+t.tag+'</span></div></a><div class="tour-content"><div class="tour-meta"><span>◷ '+t.duration+'</span><span>⌖ '+t.area+'</span></div><h3><a href="'+t.detailUrl+'">'+t.name+'</a></h3><p>'+t.desc+'</p><div class="tour-bottom"><div class="price-stack"><strong>'+t.taxiPrice+'</strong><span>Private transport · up to 4 passengers</span>'+(t.adult?'<em>Activity '+t.adult+'/adult</em>':t.cardNote==='Park tickets priced separately'?'<em>Park tickets priced separately</em>':'<em>Entry tickets quoted separately</em>')+'</div><div class="tour-actions"><a class="link-btn" href="'+t.detailUrl+'">View details →</a><button type="button" class="btn add-trip-btn" onclick="addTour(&quot;'+t.id+'&quot;)">Add to trip +</button></div></div></div></article>').join('')||'<div class="empty">No experiences match your search. Try another keyword.</div>'}
 function saveCart(){localStorage.setItem('mautaxi_cart_v2',JSON.stringify(cart));document.getElementById('cartCount').textContent=cart.length;const homeTripCount=document.getElementById('homeTripCount');if(homeTripCount)homeTripCount.textContent='('+cart.length+')';document.getElementById('openCart').setAttribute('aria-label','Open your itinerary cart, '+cart.length+' '+(cart.length===1?'experience':'experiences'));renderCart()}
-function addTour(id){const t=tours.find(x=>x.id===id);if(cart.some(x=>x.id===id)){toast(t.name+' is already in your trip');document.getElementById('openCart').click();return}cart.push({id,qty:1});saveCart();toast(t.name+' added to your trip')}
+function addTour(id){const t=tours.find(x=>x.id===id);if(cart.some(x=>x.id===id)){toast(t.name+' is already in your trip');document.getElementById('openCart').click();return}cart.push({id,qty:1});saveCart();showMyTripAdded(t.name+' added to My Trip')}
 function money(value){return '€'+Number(value||0).toFixed(2)}
 function amount(value){const n=Number.parseFloat(String(value||'').replace(/[^0-9.,]/g,'').replace(',','.'));return Number.isFinite(n)?n:0}
 const DEFAULT_TRANSPORT_OPTIONS=[
@@ -237,5 +250,12 @@ document.addEventListener('click',event=>{
   }
 });
 
+function showMyTripAdded(message){
+ const fab=document.getElementById('openCart')||document.getElementById('tourCartFab');
+ let feedback=document.getElementById('myTripFeedback');
+ if(!feedback){feedback=document.createElement('div');feedback.id='myTripFeedback';feedback.className='my-trip-feedback';feedback.setAttribute('role','status');feedback.setAttribute('aria-live','polite');document.body.appendChild(feedback)}
+ if(fab){fab.classList.remove('my-trip-added');void fab.offsetWidth;fab.classList.add('my-trip-added');setTimeout(()=>fab.classList.remove('my-trip-added'),700)}
+ feedback.textContent=message||'Added to My Trip';feedback.classList.remove('show');void feedback.offsetWidth;feedback.classList.add('show');clearTimeout(window.myTripFeedbackTimer);window.myTripFeedbackTimer=setTimeout(()=>feedback.classList.remove('show'),2200)
+}
 </script>
 </body></html>
