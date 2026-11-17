@@ -170,7 +170,7 @@ body:has(#cartBackdrop.open) #openCart.cart-btn,body.cart-open #openCart.cart-bt
 .my-trip-feedback{position:fixed;z-index:1500;left:50%;bottom:calc(88px + env(safe-area-inset-bottom));transform:translate(-50%,12px);display:flex;align-items:center;gap:9px;max-width:calc(100vw - 32px);padding:12px 17px;border:1px solid #ffffff20;border-radius:14px;background:#102b46;color:#fff;box-shadow:0 12px 32px #071b2d38;font:700 13px "DM Sans",sans-serif;opacity:0;pointer-events:none;transition:opacity .22s ease,transform .22s ease;white-space:nowrap}
 .my-trip-feedback:before{content:"✓";display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#e6b45c;color:#102b46;font-weight:900}
 .my-trip-feedback.show{opacity:1;transform:translate(-50%,0)}
-@media(max-width:600px){.my-trip-feedback{bottom:calc(82px + env(safe-area-inset-bottom));font-size:12px}}
+@media(max-width:600px){.my-trip-feedback{bottom:calc(82px + env(safe-area-inset-bottom));width:max-content;max-width:min( calc(100vw - 32px), 340px );white-space:normal;text-align:center;justify-content:center;line-height:1.35;font-size:12px;padding:11px 14px}}
 @media(prefers-reduced-motion:reduce){.my-trip-added,.my-trip-added .count,.my-trip-added .fab-count{animation:none}.my-trip-feedback{transition:none}}
 </style></head><body>
 <div class="announce">Mauritius island experiences · private transfers · local expertise</div>
