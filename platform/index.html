@@ -89,6 +89,18 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
   .tour-actions .add-trip-btn{min-height:42px}
   .faq-grid{column-count:1}
 }
+/* Shared trip editor — consistent on homepage and tour cart */
+.tour-cart-edit{display:flex;align-items:center;justify-content:space-between;width:100%;border:1px solid #d9e5f1;background:#fff;color:#173653;border-radius:12px;padding:12px 15px;font-size:13px;font-weight:800;cursor:pointer;box-shadow:0 2px 8px #17365308}
+.tour-cart-edit:after{content:'⌄';color:#3A78C9;font-size:16px}
+.tour-cart-edit[aria-expanded=true]:after{content:'⌃'}
+.tour-cart-editor{display:none;background:linear-gradient(145deg,#f5f9fe,#eef5fc);border:1px solid #dce8f4;border-radius:13px;padding:14px;margin-top:9px;animation:editPanelIn .2s ease both}
+.tour-cart-editor.open{display:block}
+.tour-cart-editor>small{display:block;color:#637a90;font-size:11px;line-height:1.5;margin-top:10px}
+.tour-cart-pax{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:4px}
+.tour-cart-pax label{font-size:11px;color:#526b82;font-weight:800;display:block}
+.tour-cart-pax select{display:block;width:100%;min-width:0;margin-top:6px;border:1px solid #d4e1ee;border-radius:9px;background:#fff;padding:10px;color:#172b40;font-size:13px;font-weight:700;box-shadow:0 1px 2px #17365308}
+@keyframes editPanelIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:600px){.tour-cart-pax{gap:7px}.tour-cart-pax select{padding:9px 5px;font-size:12px}}
 </style></head><body>
 <div class="announce">Mauritius island experiences · private transfers · local expertise</div>
 <header class="header"><a class="brand" href="index.html" aria-label="MauTaxi Tours home"><img class="brand-logo" src="../assets/images/logo11.png" alt="MauTaxi Tours"><span class="brand-caption">Discover Mauritius</span></a><nav class="navlinks" id="navlinks"><a href="#tours">Explore tours</a><a href="#transfers">Transfers</a><a href="#why">Why MauTaxi</a><a href="#contact">Contact</a></nav><div class="nav-actions"><button class="btn dark cart-btn" id="openCart" type="button" aria-label="Open My Trip" title="My Trip" aria-controls="cartBackdrop" aria-expanded="false"><svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h2l2.2 11.2a2 2 0 0 0 2 1.6h8.9a2 2 0 0 0 1.9-1.4L22 8H6"/><circle cx="10" cy="21" r="1"/><circle cx="18" cy="21" r="1"/></svg><span class="count" id="cartCount">0</span></button><button class="menu-toggle" id="menuToggle" type="button" aria-label="Open navigation menu" aria-controls="navlinks" aria-expanded="false">☰</button></div></header>
