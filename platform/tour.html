@@ -139,11 +139,11 @@ paxInputs.babies.value=String(Math.max(0,Math.min(22,Number(paxSaved.babies)||0)
 const vehicleSelect=document.getElementById('tourVehicle');
 const savedTourCart=(()=>{try{return JSON.parse(localStorage.getItem('mautaxi_cart_v2')||'[]')}catch(e){return []}})();
 const priorTour=savedTourCart.find(x=>x.id===t.id);if(priorTour?.transportation_type)vehicleSelect.value=priorTour.transportation_type;if(editingCartItem){const addButton=document.getElementById('addCart');if(addButton)addButton.innerHTML='Update my trip <span>✓</span>';}
-function updateLivePrice(){
+function updateLivePrice(forceBestFit=false){
  const adults=Number(paxInputs.adults.value),children=Number(paxInputs.children.value),babies=Number(paxInputs.babies.value),people=adults+children+babies;
  const oldType=vehicleSelect.value||priorTour?.transportation_type;
  const suitable=TOUR_VEHICLES.filter(v=>v.capacity>=people);
- const selected=suitable.find(v=>v.type===oldType)||suitable[0]||null;
+ const selected=(forceBestFit?suitable[0]:suitable.find(v=>v.type===oldType))||suitable[0]||null;
  vehicleSelect.innerHTML=TOUR_VEHICLES.map(v=>'<option value="'+v.type+'" '+(selected?.type===v.type?'selected':'')+' '+(people>v.capacity?'disabled':'')+'>'+v.label+' · up to '+v.capacity+' · '+euro(parsePrice(t.taxiPrice)+v.extra)+'</option>').join('');
  const vehicle=selected,transport=vehicle?parsePrice(t.taxiPrice)+vehicle.extra:0;
  const adultPrice=parsePrice(t.adult),childPrice=parsePrice(t.child),hasActivity=!!(t.adult||t.child||t.baby);
@@ -153,9 +153,9 @@ function updateLivePrice(){
  document.getElementById('livePriceLines').innerHTML='<div class="price-line"><span>Private transport'+(vehicle?' · '+vehicle.label:'')+'</span><b>'+(vehicle?euro(transport):'Quote required')+'</b></div>'+(hasActivity?'<div class="price-line"><span>Activity · '+adults+' adult'+(adults===1?'':'s')+' × '+euro(adultPrice)+'</span><b>'+euro(adultPrice*adults)+'</b></div><div class="price-line"><span>Activity · '+children+' child'+(children===1?'':'ren')+' × '+euro(childPrice)+'</span><b>'+euro(childPrice*children)+'</b></div><div class="price-line"><span>Baby tickets</span><b>'+safe(t.baby||'Quoted separately')+'</b></div>':'<div class="price-line"><span>Activity tickets</span><b>Quoted separately</b></div>')+'<div class="price-line total"><span>Estimated listed total</span><b>'+(people>22?'Quote required':euro(total))+'</b></div>';
  document.getElementById('livePriceHelper').textContent=(hasActivity?'Activity estimate includes adult and child tickets at listed rates. ':'Activity tickets are not yet priced and are excluded. ')+(String(t.baby||'').toUpperCase()==='FREE'?'Baby ticket is free. ':'Baby ticket price is shown separately; confirm if applicable. ')+(people>22?'Please contact us for a multiple-vehicle quote.':'Any unlisted tickets or extras will be confirmed separately.');
 }
-Object.values(paxInputs).forEach(el=>el.addEventListener('change',updateLivePrice));
-vehicleSelect.addEventListener('change',updateLivePrice);
-updateLivePrice();
+Object.values(paxInputs).forEach(el=>el.addEventListener('change',()=>updateLivePrice(true)));
+vehicleSelect.addEventListener('change',()=>updateLivePrice(false));
+updateLivePrice(false);
 function cartEscape(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 let tourCartReturnFocus=null;
 function readTourCart(){try{return JSON.parse(localStorage.getItem('mautaxi_cart_v2')||'[]')}catch(e){return []}}
