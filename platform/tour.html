@@ -121,7 +121,7 @@ const DEFAULT_TOUR_VEHICLES=[{type:'Standard Car',capacity:4,extra:0,label:'Stan
 const TOUR_VEHICLES=(()=>{try{const v=JSON.parse(localStorage.getItem('mautaxi_vehicle_options_v1')||'null');return Array.isArray(v)&&v.length?v:DEFAULT_TOUR_VEHICLES}catch(e){return DEFAULT_TOUR_VEHICLES}})();
 const parsePrice=value=>{const n=Number.parseFloat(String(value||'').replace(/[^0-9.,]/g,'').replace(',','.'));return Number.isFinite(n)?n:0};
 const euro=value=>'€'+Number(value||0).toFixed(2);
-const editingCartItem=new URLSearchParams(location.search).get('editTrip')==='1';const paxSaved=(()=>{try{const saved=JSON.parse(localStorage.getItem('mautaxi_cart_v2')||'[]').find(x=>x.id===t.id)?.passengers;if(editingCartItem&&saved)return saved;return JSON.parse(localStorage.getItem('mautaxi_passengers_v1')||'{}')}catch(e){return {}}})();
+const editingCartItem=new URLSearchParams(location.search).get('editTrip')==='1';const paxSaved=(()=>{try{const saved=JSON.parse(localStorage.getItem('mautaxi_cart_v2')||'[]').find(x=>x.id===t.id)?.passengers;if(editingCartItem)return saved||{adults:2,children:0,babies:0};return JSON.parse(localStorage.getItem('mautaxi_passengers_v1')||'{}')}catch(e){return {}}})();
 const paxInputs={adults:document.getElementById('tourAdults'),children:document.getElementById('tourChildren'),babies:document.getElementById('tourBabies')};
 paxInputs.adults.value=String(Math.max(1,Math.min(22,Number(paxSaved.adults)||2)));
 paxInputs.children.value=String(Math.max(0,Math.min(22,Number(paxSaved.children)||0)));
