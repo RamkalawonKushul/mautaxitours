@@ -77,13 +77,13 @@ body.tour-cart-open{overflow:hidden}
 </style></head>
 <body>
 <div class="top">Trusted Since 2000 · First of the Millennium</div>
-<header class="header"><a href="index.html"><img class="logo" src="../assets/images/logo11.png" alt="MauTaxi Tours"></a><div style="display:flex;align-items:center;gap:16px"><a class="back" href="index.html#tours">← All experiences</a><a class="back" href="index.html?cart=1#tours" style="font-weight:800;color:#3A78C9">My Trip <span id="tourHeaderCartCount" style="display:inline-flex;min-width:20px;height:20px;align-items:center;justify-content:center;border-radius:20px;background:#eaf2fb;padding:0 5px;font-size:11px"></span></a></div></header>
+<header class="header"><a href="index.html"><img class="logo" src="../assets/images/logo11.png" alt="MauTaxi Tours"></a><a class="back" href="index.html#tours">← All experiences</a></header>
 <main class="wrap" id="content"><div class="error"><h1>Preparing your experience…</h1></div></main>
 <footer class="footer">© <span id="year"></span> MauTaxi Tours · Mauritius · <a href="mailto:mru@mautaxitours.com">mru@mautaxitours.com</a> · +230 58 22 44 12</footer>
 <script src="config.js"></script><script src="tour-data.js"></script>
 <script>
 const params=new URLSearchParams(location.search), id=params.get('id'), baseTours=window.MAUTAXI_TOURS||[], overrides=(()=>{try{return JSON.parse(localStorage.getItem('mautaxi_tour_overrides_v1')||'{}')}catch(e){return {}}})(), custom=(()=>{try{return JSON.parse(localStorage.getItem('mautaxi_custom_tours_v1')||'[]')}catch(e){return []}})(), tours=baseTours.map(x=>({...x,...(overrides[x.id]||{})})).concat(custom), cachedDetail=sessionStorage.getItem('mautaxi_live_tour_'+id);let t=cachedDetail?JSON.parse(cachedDetail):tours.find(x=>x.id===id);if(cachedDetail)sessionStorage.removeItem('mautaxi_live_tour_'+id);
-document.getElementById('year').textContent=new Date().getFullYear();const headerCartCount=()=>{try{const items=JSON.parse(localStorage.getItem('mautaxi_cart_v2')||'[]');document.getElementById('tourHeaderCartCount').textContent=items.length||''}catch(e){document.getElementById('tourHeaderCartCount').textContent=''}};headerCartCount();window.addEventListener('storage',headerCartCount);
+document.getElementById('year').textContent=new Date().getFullYear();
 const pretty=s=>String(s||'').toLowerCase().replace(/\b[a-z]/g,c=>c.toUpperCase()).replace(/\b(Aux|De|Du|Des|Et|The|And|Of)\b/g,c=>c.toLowerCase());
 const safe=s=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 if(!t){document.getElementById('content').innerHTML='<div class="error"><h1>Experience not found</h1><p>Please return to our island experiences.</p><a class="btn dark" href="index.html#tours">Browse experiences</a></div>'}
