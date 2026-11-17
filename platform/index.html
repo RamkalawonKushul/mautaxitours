@@ -153,7 +153,7 @@ function renderCart(){const box=document.getElementById('cartItems'),summary=doc
 function removeTour(id){cart=cart.filter(x=>x.id!==id);saveCart()}
 document.getElementById('cartItems').addEventListener('change',e=>{const select=e.target.closest('.vehicle-select');if(!select)return;const item=cart.find(x=>x.id===select.dataset.id);if(item){item.transportation_type=select.value;item.last_group_size=sharedPassengers().adults+sharedPassengers().children+sharedPassengers().babies;saveCart()}});
 
-document.getElementById('clearCart').onclick=()=>{if(!cart.length)return;if(confirm('Remove all experiences from your itinerary?')){cart=[];saveCart();toast('Your itinerary has been cleared')}};
+
 let modalReturnFocus=null;
 function showModal(id){const backdrop=document.getElementById(id);if(!document.querySelector('.modal-backdrop.open'))modalReturnFocus=document.activeElement;backdrop.classList.add('open');document.body.classList.add('modal-open');if(id==='cartBackdrop')document.getElementById('openCart').setAttribute('aria-expanded','true');const close=backdrop.querySelector('.close');if(close)close.focus()}
 function hideModal(id){const backdrop=document.getElementById(id);if(!backdrop.classList.contains('open'))return;backdrop.classList.remove('open');if(!document.querySelector('.modal-backdrop.open'))document.body.classList.remove('modal-open');if(id==='cartBackdrop')document.getElementById('openCart').setAttribute('aria-expanded','false');if(!document.querySelector('.modal-backdrop.open')){const target=id==='cartBackdrop'?modalReturnFocus:document.getElementById('openCart');if(target&&document.contains(target))target.focus();modalReturnFocus=null}}
