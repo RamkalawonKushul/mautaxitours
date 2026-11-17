@@ -104,6 +104,29 @@ body.tour-cart-open #tourCartFab{opacity:0!important;visibility:hidden!important
 #tourCartFab.tour-cart-fab .fab-icon{display:block!important;width:23px!important;height:23px!important;max-width:23px!important;max-height:23px!important;stroke:#fff!important;fill:none!important;stroke-width:1.8!important;pointer-events:none!important}
 #tourCartFab.tour-cart-fab .fab-count{position:absolute!important;top:-3px!important;right:-3px!important;display:grid!important;place-items:center!important;min-width:20px!important;height:20px!important;padding:0 5px!important;border:2px solid #fff!important;border-radius:50px!important;background:#e6b45c!important;color:#102b46!important;font-size:10px!important;font-weight:800!important;line-height:1!important}
 @media(max-width:600px){#tourCartFab.tour-cart-fab{right:17px!important;bottom:calc(17px + env(safe-area-inset-bottom))!important;width:52px!important;height:52px!important;min-width:52px!important;min-height:52px!important}}
+
+/* Shared mobile My Trip control and bottom-sheet dimensions */
+@media(max-width:600px){
+  #tourCartFab.tour-cart-fab,#openCart.cart-btn{
+    right:17px!important;left:auto!important;bottom:calc(17px + env(safe-area-inset-bottom))!important;
+    top:auto!important;width:52px!important;height:52px!important;min-width:52px!important;min-height:52px!important;
+    border-radius:50%!important;background:#102b46!important;display:grid!important;place-items:center!important;
+  }
+  #tourCartBackdrop .tour-cart-modal{
+    width:100%!important;max-width:none!important;height:min(88dvh,760px)!important;
+    max-height:min(88dvh,760px)!important;min-height:min(88dvh,760px)!important;
+    margin:0!important;border-radius:22px 22px 0 0!important;
+    padding:20px 18px calc(20px + env(safe-area-inset-bottom))!important;
+    transform:translateY(24px) scale(.99)!important;opacity:.98!important;
+    transition:transform .26s cubic-bezier(.2,.75,.25,1),opacity .22s ease!important;
+    overflow-y:auto!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important;
+  }
+  #tourCartBackdrop.open .tour-cart-modal{transform:translateY(0) scale(1)!important;opacity:1!important}
+  #tourCartBackdrop .tour-cart-actions{gap:10px}
+  #tourCartBackdrop .tour-cart-actions button{min-height:48px!important;border-radius:10px!important;font:800 12px "DM Sans",sans-serif!important}
+}
+@media(prefers-reduced-motion:reduce){#tourCartBackdrop .tour-cart-modal{transition:none!important}}
+
 </style></head>
 <body>
 <div class="top">Trusted Since 2000 · First of the Millennium</div>
