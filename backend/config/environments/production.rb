@@ -19,7 +19,7 @@ Rails.application.configure do
       user_name: ENV["SMTP_USERNAME"],
       password: ENV["SMTP_PASSWORD"],
       authentication: ENV.fetch("SMTP_AUTHENTICATION", "plain").to_sym,
-      enable_starttls: true
+      enable_starttls_auto: true
     }
   else
     config.action_mailer.perform_deliveries = false
