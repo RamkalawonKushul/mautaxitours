@@ -1,4 +1,4 @@
-class ExpandBookingItemsForPassengerAndVehicleDetails < ActiveRecord::Migration[8.0]
+class ExpandBookingItemsForPassengersAndVehicles < ActiveRecord::Migration[8.0]
   def change
     add_column :booking_items, :travel_date, :date
     add_column :booking_items, :adults, :integer, null: false, default: 1
