@@ -1,13 +1,13 @@
 class BookingMailer < ApplicationMailer
   def self.delivery_configured?
-    ENV["SMTP_ADDRESS"].present? && ENV["MAILER_FROM"].present?
+    ENV["SMTP_ADDRESS"].present?
   end
 
   def customer_confirmation(booking)
     @booking = booking
     mail(
       to: @booking.customer_email,
-      from: ENV.fetch("MAILER_FROM"),
+      from: ENV.fetch("MAILER_FROM", "bookings@mautaxitours.com"),
       subject: "MauTaxi Tours booking request received — #{@booking.reference}"
     ) do |format|
       format.text { render plain: customer_message }
@@ -18,7 +18,7 @@ class BookingMailer < ApplicationMailer
     @booking = booking
     mail(
       to: ENV.fetch("ADMIN_NOTIFICATION_EMAIL"),
-      from: ENV.fetch("MAILER_FROM"),
+      from: ENV.fetch("MAILER_FROM", "bookings@mautaxitours.com"),
       reply_to: @booking.customer_email,
       subject: "New booking request — #{@booking.reference}"
     ) do |format|
@@ -30,7 +30,7 @@ class BookingMailer < ApplicationMailer
     @booking = booking
     mail(
       to: @booking.customer_email,
-      from: ENV.fetch("MAILER_FROM"),
+      from: ENV.fetch("MAILER_FROM", "bookings@mautaxitours.com"),
       subject: "MauTaxi Tours booking update — #{@booking.reference}"
     ) do |format|
       format.text { render plain: "Hello #{@booking.customer_name},\n\nYour booking request #{@booking.reference} is now marked as #{@booking.status.humanize}.\n\nThis status update does not indicate that a payment has been made. Payment status: #{@booking.payment_status.humanize}.\n\nOur team will contact you if further action is needed.\n\nMauTaxi Tours\n+230 58 22 44 12" }
