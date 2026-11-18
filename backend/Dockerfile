@@ -17,4 +17,6 @@ ENV RAILS_ENV=production \
 
 EXPOSE 10000
 
-CMD ["bash", "-lc", "bin/rails server -b 0.0.0.0 -p ${PORT:-10000}"]
+# Prepare the trial database on startup because Render's free web instances
+# do not support pre-deploy commands or one-off shell jobs.
+CMD ["bash", "-lc", "bin/rails db:prepare && bin/rails server -b 0.0.0.0 -p ${PORT:-10000}"]
