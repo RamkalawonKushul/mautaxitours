@@ -4,7 +4,7 @@ module Api
       class PaymentsController < BaseController
         def index
           payments = Payment.includes(:booking).order(created_at: :desc).limit(200)
-          render json: payments.map do |payment|
+          records = payments.map do |payment|
             {
               id: payment.id,
               provider: payment.provider,
@@ -19,6 +19,7 @@ module Api
               booking_status: payment.booking.status
             }
           end
+          render json: records
         end
       end
     end
