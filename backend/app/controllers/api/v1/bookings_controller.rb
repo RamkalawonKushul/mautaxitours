@@ -2,18 +2,28 @@ module Api
   module V1
     class BookingsController < ApplicationController
       def create
+        key = request.headers["Idempotency-Key"].presence
+        if key.present? && !key.match?(/\\A[a-zA-Z0-9_-]{16,128}\\z/)
+          raise ActionController::BadRequest, "Invalid booking request key"
+        end
+
+        if key.present? && (existing = Booking.includes(booking_items: :tour).find_by(idempotency_key: key))
+          return render json: serialize_booking(existing), status: :ok
+        end
+
         booking = nil
         ActiveRecord::Base.transaction do
           items = params.require(:items)
           raise ActionController::BadRequest, "At least one tour is required" if items.blank?
 
           booking = Booking.new(booking_params)
+          booking.idempotency_key = key
           total = 0
 
           items.each do |item|
             identifier = item.require(:tour_id).to_s
             tour = Tour.published.find_by(slug: identifier)
-            tour ||= Tour.published.find(identifier) if identifier.match?(/\A\d+\z/)
+            tour ||= Tour.published.find(identifier) if identifier.match?(/\\A\\d+\\z/)
             raise ActiveRecord::RecordNotFound, "Tour not found" unless tour
 
             adults = integer_value(item[:adults], 1)
@@ -29,10 +39,12 @@ module Api
             rescue Date::Error
               raise ActionController::BadRequest, "Each tour must have a valid travel date"
             end
+            raise ActionController::BadRequest, "Travel dates cannot be in the past" if travel_date < Date.current
 
-            vehicle = VehicleOption.active.find_by(name: item[:vehicle_name].to_s)
-            vehicle ||= VehicleOption.active.first
-            raise ActionController::BadRequest, "No active vehicle option is available" unless vehicle
+            vehicle_name = item[:vehicle_name].to_s.strip
+            raise ActionController::BadRequest, "Please select a vehicle for every tour" if vehicle_name.blank?
+            vehicle = VehicleOption.active.find_by(name: vehicle_name)
+            raise ActionController::BadRequest, "The selected vehicle is no longer available. Please refresh and try again." unless vehicle
             raise ActionController::BadRequest, "Selected vehicle cannot carry this group size" if vehicle.capacity < travellers
             raise ActionController::BadRequest, "Vehicle and tour currencies must match" unless vehicle.currency == tour.currency
 
@@ -67,7 +79,11 @@ module Api
           booking.save!
         end
 
+        send_booking_notifications(booking)
         render json: serialize_booking(booking), status: :created
+      rescue ActiveRecord::RecordNotUnique
+        existing = Booking.includes(booking_items: :tour).find_by!(idempotency_key: key)
+        render json: serialize_booking(existing), status: :ok
       rescue ActiveRecord::RecordInvalid => error
         render json: { errors: error.record.errors.full_messages }, status: :unprocessable_entity
       rescue ArgumentError, TypeError
@@ -80,6 +96,15 @@ module Api
       end
 
       private
+
+      def send_booking_notifications(booking)
+        return unless BookingMailer.delivery_configured?
+
+        BookingMailer.customer_confirmation(booking).deliver_now
+        BookingMailer.admin_notification(booking).deliver_now if ENV["ADMIN_NOTIFICATION_EMAIL"].present?
+      rescue StandardError => error
+        Rails.logger.error("Booking notification failed for #{booking.reference}: #{error.class}: #{error.message}")
+      end
 
       def integer_value(value, default)
         return default if value.nil?
