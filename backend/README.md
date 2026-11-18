@@ -39,17 +39,24 @@ Booking payload example:
     "pickup_details": "Hotel name / pickup point",
     "special_requests": "Child seat required"
   },
-  "items": [{ "tour_id": 1, "quantity": 2 }]
+  "items": [{
+    "tour_id": "cataileauxcerf-details",
+    "travel_date": "2027-04-15",
+    "adults": 2,
+    "children": 1,
+    "babies": 0,
+    "vehicle_name": "Standard Car"
+  }]
 }
 ```
 
-Prices are calculated from database tour prices; client-submitted prices are never trusted. New bookings start as pending/unpaid. Authenticated administrator CRUD is available once the Rails API and PostgreSQL are deployed; live card payment processing remains pending SBM merchant integration.
+The API calculates each booking from published tour prices, activity rates and active vehicle options; browser-submitted prices are ignored. Passenger counts, vehicle capacity, currency, dates and customer email are validated on the server. New bookings start as pending/unpaid and receive a server-generated reference. Checkout retries can include an Idempotency-Key header to avoid duplicate bookings. Public reference lookup returns a limited summary and does not expose customer contact details. Customer and administrator email notifications are sent only when SMTP is configured; otherwise booking creation still succeeds and email delivery is skipped. The public website submits bookings to this API only after MAUTAXI_API_URL is configured.
 
 ## Deployment
 
 The repository-root `render.yaml` Blueprint provisions the Rails API and PostgreSQL in Singapore. It uses the `backend/` directory as the Docker build root, runs database migrations as a pre-deploy step, and exposes `/api/v1/health` for health checks. Keep secrets in Render environment variables; never commit them to Git.
 
-Before production: configure HTTPS, database backups, monitoring, mail delivery, staff authentication/roles, admin audit logs, and payment-provider webhooks. A booking must never be marked paid based only on a browser redirect.
+Before production: configure HTTPS, database backups, monitoring, SMTP delivery, staff credentials, login throttling, admin audit logs, and payment-provider webhooks. A booking must never be marked paid based only on a browser redirect. Use backend/.env.example as the environment-variable reference. Set SMTP_ADDRESS, SMTP_PORT, SMTP_DOMAIN, SMTP_USERNAME, SMTP_PASSWORD, MAILER_FROM and optionally ADMIN_NOTIFICATION_EMAIL to enable booking receipt, admin alert and booking-status emails. Verify the sender domain with your mail provider before sending customer mail.
 
 ## Payments (SBM-first)
 
@@ -79,7 +86,7 @@ The initial seed imports the existing tour catalogue and the current vehicle cap
 - `GET/POST /api/v1/admin/vehicles`, `PATCH/DELETE /api/v1/admin/vehicles/:id` — manage fleet and upgrade prices.
 - `GET /api/v1/tours`, `GET /api/v1/tours/:slug`, `GET /api/v1/vehicles` — public read-only catalogue.
 
-Tour images are currently managed by editing their HTTPS image URL. A managed image upload/storage workflow, password reset, multi-admin roles, login throttling, audit history, and full booking/payment management are not yet included. Add those controls before opening the CMS to multiple staff members. The API and database must be hosted and configured before live edits are available; the static Vercel deployment alone does not provide a Rails database.
+The admin booking, customer, transfer, payment-ledger and report endpoints are implemented and require the signed administrator bearer token. Payment records are read-only; there is no admin action that can mark a booking as paid. The static website still needs the deployed API URL, and all migrations must be run before live booking management can begin. Password reset, multi-admin roles, login throttling and audit history remain pre-production hardening tasks.
 
 
 ## Deploy on Render
