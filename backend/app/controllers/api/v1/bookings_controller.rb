@@ -13,7 +13,7 @@ module Api
           items.each do |item|
             identifier = item.require(:tour_id).to_s
             tour = Tour.published.find_by(slug: identifier)
-            tour ||= Tour.published.find(identifier) if identifier.match?(/\\A\\d+\\z/)
+            tour ||= Tour.published.find(identifier) if identifier.match?(/\A\d+\z/)
             raise ActiveRecord::RecordNotFound, "Tour not found" unless tour
 
             adults = integer_value(item[:adults], 1)
