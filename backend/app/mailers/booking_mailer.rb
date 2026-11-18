@@ -1,6 +1,6 @@
 class BookingMailer < ApplicationMailer
   def self.delivery_configured?
-    ENV["SMTP_ADDRESS"].present?
+    Rails.env.production? && ENV["SMTP_ADDRESS"].present?
   end
 
   def customer_confirmation(booking)
