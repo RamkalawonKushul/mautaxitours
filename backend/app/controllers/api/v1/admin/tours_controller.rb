@@ -47,12 +47,12 @@ module Api
             :name, :slug, :summary, :description, :image_url, :duration_minutes,
             :price_cents, :currency, :published, :area, :category_key,
             :adult_price_cents, :child_price_cents, :baby_price_label,
-            :tour_category_id, included_items: [], excluded_items: [], itinerary: []
+            :tour_category_id, included_items: [], excluded_items: [], itinerary: [], gallery_image_urls: []
           )
         end
 
         def serialize(tour)
-          tour.as_json(only: %i[id name slug summary description image_url duration_minutes price_cents currency published area category_key adult_price_cents child_price_cents baby_price_label included_items excluded_items itinerary])
+          tour.as_json(only: %i[id name slug summary description image_url duration_minutes price_cents currency published area category_key adult_price_cents child_price_cents baby_price_label included_items excluded_items itinerary gallery_image_urls])
         end
       end
     end
