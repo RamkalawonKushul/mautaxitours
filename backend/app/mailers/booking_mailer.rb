@@ -26,6 +26,17 @@ class BookingMailer < ApplicationMailer
     end
   end
 
+  def status_update(booking)
+    @booking = booking
+    mail(
+      to: @booking.customer_email,
+      from: ENV.fetch("MAILER_FROM"),
+      subject: "MauTaxi Tours booking update — #{@booking.reference}"
+    ) do |format|
+      format.text { render plain: "Hello #{@booking.customer_name},\n\nYour booking request #{@booking.reference} is now marked as #{@booking.status.humanize}.\n\nThis status update does not indicate that a payment has been made. Payment status: #{@booking.payment_status.humanize}.\n\nOur team will contact you if further action is needed.\n\nMauTaxi Tours\n+230 58 22 44 12" }
+    end
+  end
+
   private
 
   def customer_message
