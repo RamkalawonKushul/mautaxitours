@@ -50,8 +50,10 @@ module Api
 
             transport_cents = tour.price_cents
             upgrade_cents = vehicle.upgrade_cents
+            adult_activity_cents = (tour.adult_price_cents || 0) * adults
+            child_activity_cents = (tour.child_price_cents || 0) * children
+            activity_cents = adult_activity_cents + child_activity_cents
             activity_priced = tour.adult_price_cents.present? && tour.child_price_cents.present?
-            activity_cents = activity_priced ? (tour.adult_price_cents * adults) + (tour.child_price_cents * children) : 0
             line_total = transport_cents + upgrade_cents + activity_cents
 
             booking.booking_items.build(
