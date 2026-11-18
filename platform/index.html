@@ -178,7 +178,7 @@ body:has(#cartBackdrop.open) #openCart.cart-btn,body.cart-open #openCart.cart-bt
 .transfer-form .field:has(input[type="date"]),.searchbar .field:has(#searchDate){cursor:pointer}
 .transfer-form .field:has(input[type="date"]) input[type="date"],.searchbar #searchDate{cursor:pointer;color-scheme:light}
 .transfer-form .field:has(input[type="date"]) input[type="date"]::-webkit-calendar-picker-indicator,.searchbar #searchDate::-webkit-calendar-picker-indicator{cursor:pointer;filter:invert(37%) sepia(24%) saturate(1285%) hue-rotate(176deg) brightness(91%) contrast(88%)}
-.cart-date-label{display:block;margin:12px 0 5px;color:#64788c;font-size:11px;font-weight:800}.tour-date-field{margin-top:0}.tour-date-field>div{flex:1;min-width:0}
+.cart-date-label{display:block;margin:12px 0 5px;color:#64788c;font-size:11px;font-weight:800}.tour-date-field{margin-top:0;cursor:pointer;touch-action:manipulation}.tour-date-field>div{flex:1;min-width:0}
 </style></head><body>
 <div class="announce">Mauritius island experiences · private transfers · local expertise</div>
 <header class="header"><a class="brand" href="index.html" aria-label="MauTaxi Tours home"><img class="brand-logo" src="../assets/images/logo11.png" alt="MauTaxi Tours"><span class="brand-caption">Discover Mauritius</span></a><nav class="navlinks" id="navlinks"><a href="#tours">Explore tours</a><a href="#transfers">Transfers</a><a href="#why">Why MauTaxi</a><a href="#contact">Contact</a></nav><div class="nav-actions"><button class="btn dark cart-btn" id="openCart" type="button" aria-label="Open My Trip" title="My Trip" aria-controls="cartBackdrop" aria-expanded="false"><svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h2l2.2 11.2a2 2 0 0 0 2 1.6h8.9a2 2 0 0 0 1.9-1.4L22 8H6"/><circle cx="10" cy="21" r="1"/><circle cx="18" cy="21" r="1"/></svg><span class="count" id="cartCount">0</span></button><button class="menu-toggle" id="menuToggle" type="button" aria-label="Open navigation menu" aria-controls="navlinks" aria-expanded="false">☰</button></div></header>
@@ -265,8 +265,8 @@ function showMyTripAdded(message){
  feedback.textContent=message||'Added to My Trip';feedback.classList.remove('show');void feedback.offsetWidth;feedback.classList.add('show');clearTimeout(window.myTripFeedbackTimer);window.myTripFeedbackTimer=setTimeout(()=>feedback.classList.remove('show'),2200)
 }
 
-// Let the whole date-field area open the native calendar, not only the small icon/input.
-function openNativeDatePicker(input){if(!input)return;try{if(typeof input.showPicker==='function')input.showPicker();else{input.focus();input.click()}}catch(error){input.focus();input.click()}}
-document.querySelectorAll('.transfer-form .field:has(input[type="date"]),.searchbar .field:has(#searchDate)').forEach(field=>{field.addEventListener('click',event=>{const input=field.querySelector('input[type="date"]');if(input&&event.target!==input)openNativeDatePicker(input)})});
+// Delegate date clicks so static fields and dynamically rendered cart rows all work.
+function openNativeDatePicker(input){if(!input)return;try{if(typeof input.showPicker==='function')input.showPicker();else input.focus()}catch(error){input.focus()}}
+document.addEventListener('click',event=>{const field=event.target.closest('.tour-date-field,.transfer-form .field:has(input[type="date"]),.searchbar .field:has(#searchDate)');if(!field)return;const input=field.querySelector('input[type="date"]');if(input&&event.target!==input)openNativeDatePicker(input)});
 </script>
 </body></html>
