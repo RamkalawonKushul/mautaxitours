@@ -12,6 +12,7 @@ on:
     paths:
       - "backend/**"
       - ".github/workflows/rails-api.yml"
+      - "render.yaml"
 
 jobs:
   test:
