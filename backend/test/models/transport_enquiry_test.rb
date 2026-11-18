@@ -11,7 +11,7 @@ class TransportEnquiryTest < ActiveSupport::TestCase
     )
 
     assert_match(/\ATR-[A-Z0-9]{8}\z/, enquiry.reference)
-    assert enquiry.new?
+    assert enquiry.status_new?
   end
 
   test "rejects passenger counts above fleet capacity" do
