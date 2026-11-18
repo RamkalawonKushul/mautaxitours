@@ -1,5 +1,5 @@
-# Render Blueprint for the MauTaxi Tours Rails API and PostgreSQL.
-# This file is intentionally on platform-modernization; it does not change main.
+# Render Blueprint for MauTaxi Tours production API and PostgreSQL.
+# Create the services from this file only after reviewing the estimated charges.
 services:
   - type: web
     name: mautaxi-api
@@ -9,9 +9,13 @@ services:
     plan: 0.5c-512mb
     region: singapore
     branch: platform-modernization
-    autoDeployTrigger: commit
+    autoDeployTrigger: off
     healthCheckPath: /api/v1/health
     preDeployCommand: bin/rails db:migrate
+    initialDeployHook: bin/rails db:seed
+    maxShutdownDelaySeconds: 60
+    domains:
+      - api.mautaxitours.com
     envVars:
       - key: RAILS_ENV
         value: production
@@ -19,6 +23,8 @@ services:
         value: "1"
       - key: RAILS_SERVE_STATIC_FILES
         value: "1"
+      - key: FORCE_SSL
+        value: "true"
       - key: SECRET_KEY_BASE
         generateValue: true
       - key: DATABASE_URL
@@ -27,6 +33,24 @@ services:
           property: connectionString
       - key: CORS_ORIGINS
         value: https://mautaxitours.com,https://www.mautaxitours.com,https://mautaxitours.vercel.app
+      - key: APP_HOST
+        value: www.mautaxitours.com
+      - key: SMTP_ADDRESS
+        value: smtp.hostinger.com
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_DOMAIN
+        value: mautaxitours.com
+      - key: SMTP_AUTHENTICATION
+        value: plain
+      - key: SMTP_USERNAME
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: MAILER_FROM
+        value: bookings@mautaxitours.com
+      - key: ADMIN_NOTIFICATION_EMAIL
+        sync: false
 
 databases:
   - name: mautaxi-postgres
@@ -36,3 +60,4 @@ databases:
     region: singapore
     postgresMajorVersion: "17"
     diskSizeGB: 5
+    ipAllowList: []
