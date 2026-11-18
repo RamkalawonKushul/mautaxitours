@@ -27,7 +27,15 @@ module Api
             return render json: { error: "Choose a valid booking status" }, status: :unprocessable_entity
           end
 
+          previous_status = booking.status
           booking.update!(status: status)
+          if previous_status != booking.status && BookingMailer.delivery_configured?
+            begin
+              BookingMailer.status_update(booking).deliver_now
+            rescue StandardError => error
+              Rails.logger.error("Booking status email failed for #{booking.reference}: #{error.class}: #{error.message}")
+            end
+          end
           render json: serialize(booking)
         rescue ActiveRecord::RecordInvalid => error
           render json: { errors: error.record.errors.full_messages }, status: :unprocessable_entity
