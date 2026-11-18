@@ -1,5 +1,5 @@
 class TransportEnquiry < ApplicationRecord
-  enum :status, { new: "new", contacted: "contacted", quoted: "quoted", confirmed: "confirmed", cancelled: "cancelled" }
+  enum :status, { new: "new", contacted: "contacted", quoted: "quoted", confirmed: "confirmed", cancelled: "cancelled" }, prefix: true
 
   validates :reference, presence: true, uniqueness: true
   validates :pickup_location, :destination, :travel_date, :pickup_time, presence: true
