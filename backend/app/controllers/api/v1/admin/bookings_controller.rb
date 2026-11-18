@@ -26,6 +26,9 @@ module Api
           unless Booking.statuses.key?(status)
             return render json: { error: "Choose a valid booking status" }, status: :unprocessable_entity
           end
+          if status == "cancelled" && booking.paid?
+            return render json: { error: "This booking has a recorded payment. Verify the refund with the payment provider before cancelling it." }, status: :unprocessable_entity
+          end
 
           previous_status = booking.status
           booking.update!(status: status)
