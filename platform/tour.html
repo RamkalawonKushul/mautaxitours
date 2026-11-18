@@ -148,7 +148,7 @@ body.tour-cart-open #tourCartFab{opacity:0!important;visibility:hidden!important
 #tourDateField .tour-date-label{font-size:10px;margin-bottom:2px;letter-spacing:.04em}
 #tourDateField input[type="date"]{min-height:20px;font-size:14px;font-weight:700}
 #tourDateField:focus-within{border-color:#3a78c9;box-shadow:0 0 0 3px rgba(58,120,201,.12)}
-.cart-date-label{display:block;margin:12px 0 5px;color:#64788c;font-size:11px;font-weight:800}.tour-date-field{margin-top:0}.tour-date-field>div{flex:1;min-width:0}#tourDateField{margin-top:5px}
+.cart-date-label{display:block;margin:12px 0 5px;color:#64788c;font-size:11px;font-weight:800}.tour-date-field{margin-top:0;cursor:pointer;touch-action:manipulation}.tour-date-field>div{flex:1;min-width:0}#tourDateField{margin-top:5px}
 </style></head>
 <body>
 <div class="top">Trusted Since 2000 · First of the Millennium</div>
@@ -266,8 +266,7 @@ if(window.MAUTAXI_API_URL&&!cachedDetail){fetch(window.MAUTAXI_API_URL.replace(/
  feedback.textContent=message||'Added to My Trip';feedback.classList.remove('show');void feedback.offsetWidth;feedback.classList.add('show');clearTimeout(window.myTripFeedbackTimer);window.myTripFeedbackTimer=setTimeout(()=>feedback.classList.remove('show'),2200)
 }
 
-// The complete date control is clickable, matching the vehicle selector's usability.
-const tourDateField=document.getElementById('tourDateField');
-const tourDateInput=document.getElementById('tourDate');
-if(tourDateField&&tourDateInput){tourDateField.addEventListener('click',event=>{if(event.target!==tourDateInput){try{if(typeof tourDateInput.showPicker==='function')tourDateInput.showPicker();else{tourDateInput.focus();tourDateInput.click()}}catch(error){tourDateInput.focus();tourDateInput.click()}}})}
+// Delegate date clicks so the main selector and every dynamically rendered cart date work.
+function openTourNativeDatePicker(input){if(!input)return;try{if(typeof input.showPicker==='function')input.showPicker();else input.focus()}catch(error){input.focus()}}
+document.addEventListener('click',event=>{const field=event.target.closest('#tourDateField,.tour-date-field');if(!field)return;const input=field.querySelector('input[type="date"]');if(input&&event.target!==input)openTourNativeDatePicker(input)});
 </script><button class="tour-cart-fab" id="tourCartFab" type="button" aria-label="Open My Trip, 0 experiences" title="My Trip" onclick="window.openTourCart()"><svg class="fab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h2l2.2 11.2a2 2 0 0 0 2 1.6h8.9a2 2 0 0 0 1.9-1.4L22 8H6"/><circle cx="10" cy="21" r="1"/><circle cx="18" cy="21" r="1"/></svg><span class="fab-count" id="tourCartFabCount">0</span></button><div class="tour-cart-backdrop" id="tourCartBackdrop"><section class="tour-cart-modal" role="dialog" aria-modal="true" aria-labelledby="tourCartTitle"><div class="tour-cart-head"><div><div class="eyebrow-blue">Your itinerary</div><h2 id="tourCartTitle">Your trip <span id="tourCartCount" style="font-size:12px;color:#687b8e;font-weight:600"></span></h2></div><button class="tour-cart-close" id="tourCartClose" type="button" aria-label="Close cart">×</button></div><p class="tour-cart-intro">Your selection has been added. You can keep browsing or adjust your trip below.</p><div class="tour-cart-items" id="tourCartItems"></div><div class="tour-cart-summary" id="tourCartSummary"></div><div class="tour-cart-actions"><button class="tour-cart-continue" id="tourCartContinue" type="button">Continue exploring</button><button class="tour-cart-checkout" id="tourCartCheckout" type="button">Booking details →</button></div></section></div></body></html>
