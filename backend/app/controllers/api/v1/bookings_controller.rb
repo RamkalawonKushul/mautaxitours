@@ -22,8 +22,13 @@ module Api
             travellers = adults + children + babies
             raise ActionController::BadRequest, "Each tour must have between 1 and 22 travellers" unless travellers.between?(1, 22)
 
-            travel_date = item[:travel_date].presence || booking.travel_date
-            raise ActionController::BadRequest, "A travel date is required for every tour" if travel_date.blank?
+            date_input = item[:travel_date].presence || booking.travel_date&.iso8601
+            raise ActionController::BadRequest, "A travel date is required for every tour" if date_input.blank?
+            begin
+              travel_date = Date.iso8601(date_input.to_s)
+            rescue Date::Error
+              raise ActionController::BadRequest, "Each tour must have a valid travel date"
+            end
 
             vehicle = VehicleOption.active.find_by(name: item[:vehicle_name].to_s)
             vehicle ||= VehicleOption.active.first
