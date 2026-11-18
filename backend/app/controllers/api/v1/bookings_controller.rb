@@ -28,6 +28,7 @@ module Api
             vehicle = VehicleOption.active.find_by(name: item[:vehicle_name].to_s)
             vehicle ||= VehicleOption.active.first
             raise ActionController::BadRequest, "No active vehicle option is available" unless vehicle
+            raise ActionController::BadRequest, "Selected vehicle cannot carry this group size" if vehicle.capacity < travellers
             raise ActionController::BadRequest, "Vehicle and tour currencies must match" unless vehicle.currency == tour.currency
 
             transport_cents = tour.price_cents
