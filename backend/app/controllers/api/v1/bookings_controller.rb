@@ -75,6 +75,7 @@ module Api
             total += line_total
           end
 
+          booking.travel_date ||= booking.booking_items.first.travel_date
           booking.currency = booking.booking_items.first.tour.currency
           raise ActionController::BadRequest, "All tours in one booking must use the same currency" unless booking.booking_items.all? { |item| item.tour.currency == booking.currency }
           booking.total_cents = total
