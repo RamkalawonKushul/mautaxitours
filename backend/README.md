@@ -82,6 +82,11 @@ The initial seed imports the existing tour catalogue and the current vehicle cap
 ### Administrator API
 
 - `POST /api/v1/admin/session` — authenticate and receive a signed 12-hour bearer token.
+- `GET/PATCH /api/v1/admin/bookings`, `GET /api/v1/admin/bookings/:id` — list, inspect and update booking status.
+- `GET /api/v1/admin/customers` — customer directory derived from saved bookings.
+- `GET /api/v1/admin/transfers`, `PATCH /api/v1/admin/transfers/:id` — manage transfer enquiry status.
+- `GET /api/v1/admin/payments` — read-only payment ledger.
+- `GET /api/v1/admin/reports` — booking counts and verified paid revenue grouped by currency.
 - `GET/POST /api/v1/admin/tours`, `GET/PATCH/DELETE /api/v1/admin/tours/:id` — manage tours; delete archives rather than physically deleting booking history.
 - `GET/POST /api/v1/admin/vehicles`, `PATCH/DELETE /api/v1/admin/vehicles/:id` — manage fleet and upgrade prices.
 - `GET /api/v1/tours`, `GET /api/v1/tours/:slug`, `GET /api/v1/vehicles` — public read-only catalogue.
