@@ -12,7 +12,6 @@ services:
     branch: platform-modernization
     autoDeployTrigger: off
     healthCheckPath: /api/v1/health
-    maxShutdownDelaySeconds: 60
     envVars:
       - key: RAILS_ENV
         value: production
