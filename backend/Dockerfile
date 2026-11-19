@@ -20,4 +20,4 @@ EXPOSE 10000
 # Prepare the trial database on startup because Render's free web instances
 # do not support pre-deploy commands or one-off shell jobs.
 # Invoke the Rails binstub through Ruby so executable file permissions are not required.
-CMD ["bash", "-lc", "bundle exec ruby bin/rails db:prepare && bundle exec ruby bin/rails server -b 0.0.0.0 -p ${PORT:-10000}"]
+CMD ["bash", "-lc", "bundle exec ruby bin/rails db:prepare && bundle exec ruby bin/rails db:seed && bundle exec ruby bin/rails server -b 0.0.0.0 -p ${PORT:-10000}"]
