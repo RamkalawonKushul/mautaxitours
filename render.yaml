@@ -5,8 +5,8 @@ services:
     name: mautaxi-api-trial
     runtime: docker
     rootDir: backend
-    dockerfilePath: backend/Dockerfile
-    dockerContext: backend
+    dockerfilePath: Dockerfile
+    dockerContext: .
     plan: free
     region: singapore
     branch: platform-modernization
