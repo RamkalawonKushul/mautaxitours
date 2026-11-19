@@ -15,7 +15,7 @@ Rails.application.routes.draw do
         resources :tours, only: %i[index show create update destroy]
         resources :vehicle_options, path: "vehicles", only: %i[index create update destroy]
       end
-      get "vehicles", to: "vehicle_options#index"
+      get "vehicles", to: "vehicles#index"
     end
   end
 end
