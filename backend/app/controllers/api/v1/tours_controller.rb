@@ -13,7 +13,14 @@ module Api
       private
 
       def serialize(tour)
-        tour.as_json(only: %i[id name slug summary description image_url duration_minutes price_cents currency area category_key adult_price_cents child_price_cents baby_price_label included_items excluded_items itinerary gallery_image_urls])
+        attributes = tour.as_json(only: %i[id name slug summary description image_url duration_minutes price_cents currency area category_key adult_price_cents child_price_cents baby_price_label included_items excluded_items itinerary gallery_image_urls])
+        attributes["image_url"] = normalized_image_url(attributes["image_url"])
+        attributes
+      end
+
+      def normalized_image_url(value)
+        match = value.to_s.match(/\\A\\[([^\\]]+)\\]\\((https?:\\/\\/[^)]+)\\)\\z/)
+        match ? match[2] : value
       end
     end
   end
