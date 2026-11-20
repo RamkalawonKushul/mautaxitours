@@ -19,3 +19,16 @@ end
     vehicle.currency = "EUR"
   end
 end
+
+# Populate each tour's exact public price for every active vehicle.
+# The existing tour price is the Standard Car fare; existing vehicle upgrades
+# are added to that fare. Existing admin-edited prices are never overwritten.
+Tour.find_each do |tour|
+  VehicleOption.active.find_each do |vehicle|
+    TourVehiclePrice.find_or_create_by!(tour: tour, vehicle_option: vehicle) do |price|
+      price.price_cents = tour.price_cents + vehicle.upgrade_cents
+      price.currency = tour.currency
+      price.active = true
+    end
+  end
+end
