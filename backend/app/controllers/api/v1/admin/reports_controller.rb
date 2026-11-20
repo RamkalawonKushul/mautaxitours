@@ -13,6 +13,17 @@ module Api
             { currency: currency, total_cents: total }
           end
 
+          booking_value = bookings.group(:currency).sum(:total_cents)
+          active_assignments = OperatorAssignment.joins(:booking)
+                                                   .where(booking_id: bookings.select(:id))
+                                                   .where.not(status: %w[declined cancelled reassigned])
+          operator_costs = active_assignments.group(:currency).sum(:operator_cost_cents)
+          operator_outstanding = active_assignments.group(:currency).sum("operator_cost_cents - operator_paid_cents")
+          finance_currencies = (booking_value.keys + operator_costs.keys).uniq.sort
+          estimated_margin = finance_currencies.map do |currency|
+            { currency: currency, total_cents: booking_value.fetch(currency, 0) - operator_costs.fetch(currency, 0) }
+          end
+
           render json: {
             bookings_total: bookings.count,
             bookings_pending: bookings.pending.count,
@@ -24,6 +35,10 @@ module Api
             failed_payments_count: apply_date_filter(Payment.where(status: "failed"), :created_at, range).count,
             refunded_payments_count: apply_date_filter(Payment.where(status: "refunded"), :created_at, range).count,
             revenue_by_currency: revenue,
+            booking_value_by_currency: booking_value.map { |currency, total| { currency: currency, total_cents: total } },
+            operator_costs_by_currency: operator_costs.map { |currency, total| { currency: currency, total_cents: total } },
+            operator_outstanding_by_currency: operator_outstanding.map { |currency, total| { currency: currency, total_cents: total } },
+            estimated_margin_by_currency: estimated_margin,
             recent_bookings: bookings.order(created_at: :desc).limit(10).map do |booking|
               {
                 reference: booking.reference,
