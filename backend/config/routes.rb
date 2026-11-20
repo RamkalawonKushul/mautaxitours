@@ -1,0 +1,26 @@
+Rails.application.routes.draw do
+  namespace :api do
+    namespace :v1 do
+      get "health", to: "health#show"
+      resources :tours, only: %i[index show]
+      resources :bookings, only: %i[create show]
+      resources :transport_enquiries, only: %i[create]
+      namespace :admin do
+        post "session", to: "sessions#create"
+        post "initial_setup", to: "initial_setup#create"
+        resources :bookings, only: %i[index show update]
+        resources :customers, only: %i[index]
+        resources :payments, only: %i[index]
+        resources :transport_enquiries, path: "transfers", only: %i[index update]
+        resources :operators, only: %i[index create update destroy]
+        resources :operator_assignments, only: %i[index create update]
+        resource :reports, only: %i[show]
+        resources :tours, only: %i[index show create update destroy] do
+          resources :vehicle_prices, controller: "tour_vehicle_prices", only: %i[index create update destroy]
+        end
+        resources :vehicle_options, path: "vehicles", only: %i[index create update destroy]
+      end
+      get "vehicles", to: "vehicles#index"
+    end
+  end
+end
