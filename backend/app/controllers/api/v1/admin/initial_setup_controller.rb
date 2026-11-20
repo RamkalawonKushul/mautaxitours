@@ -15,10 +15,16 @@ module Api
           email = admin_params.require(:email).to_s.strip.downcase
           password = admin_params.require(:password).to_s
 
-          return render json: { error: "A valid email address is required" }, status: :unprocessable_entity unless email.match?(URI::MailTo::EMAIL_REGEXP)
+          return render json: { error: "A valid email address is required" }, status: :unprocessable_entity unless email.match?(/\\A[^@\\s]+@[^@\\s]+\\.[^@\\s]+\\z/)
           return render json: { error: "Password must contain at least 14 characters" }, status: :unprocessable_entity if password.length < 14
 
-          user = AdminUser.create!(email: email, password: password)
+          user = nil
+          AdminUser.transaction do
+            AdminUser.connection.execute("LOCK TABLE admin_users IN EXCLUSIVE MODE")
+            raise ActiveRecord::RecordNotUnique if AdminUser.exists?
+
+            user = AdminUser.create!(email: email, password: password)
+          end
           render json: { created: true, admin: { id: user.id, email: user.email } }, status: :created
         rescue ActiveRecord::RecordNotUnique
           render json: { error: "Administrator setup has already been completed" }, status: :conflict
