@@ -20,13 +20,16 @@ module Api
                                                            .where(booking_id: finance_bookings.select(:id))
                                                            .where.not(status: %w[declined cancelled reassigned])
           active_transfer_assignments = OperatorAssignment.joins(:transport_enquiry)
-                                                            .where(transport_enquiry_id: transfer_enquiries.select(:id))
+                                                            .where(transport_enquiry_id: transfer_enquiries.where.not(status: "cancelled").select(:id))
                                                             .where.not(status: %w[declined cancelled reassigned])
           transfer_value = active_transfer_assignments.group(:currency).sum(:customer_price_cents)
           booking_value = booking_value.merge(transfer_value) { |_currency, booking_total, transfer_total| booking_total + transfer_total }
-          active_assignments = active_booking_assignments.or(active_transfer_assignments)
-          operator_costs = active_assignments.group(:currency).sum(:operator_cost_cents)
-          operator_outstanding = active_assignments.group(:currency).sum("operator_cost_cents - operator_paid_cents")
+          booking_costs = active_booking_assignments.group(:currency).sum(:operator_cost_cents)
+          transfer_costs = active_transfer_assignments.group(:currency).sum(:operator_cost_cents)
+          operator_costs = booking_costs.merge(transfer_costs) { |_currency, booking_cost, transfer_cost| booking_cost + transfer_cost }
+          booking_outstanding = active_booking_assignments.group(:currency).sum("operator_cost_cents - operator_paid_cents")
+          transfer_outstanding = active_transfer_assignments.group(:currency).sum("operator_cost_cents - operator_paid_cents")
+          operator_outstanding = booking_outstanding.merge(transfer_outstanding) { |_currency, booking_due, transfer_due| booking_due + transfer_due }
           finance_currencies = (booking_value.keys + operator_costs.keys).uniq.sort
           estimated_margin = finance_currencies.map do |currency|
             { currency: currency, total_cents: booking_value.fetch(currency, 0) - operator_costs.fetch(currency, 0) }

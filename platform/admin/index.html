@@ -224,7 +224,7 @@ async function openBookingDetails(id){
  }catch(error){alert(error.message)}
 }
 function closeBookingDetails(){$('bookingDetailModal').style.display='none';document.body.style.overflow=''}
-let operatorsCache=[],assignmentsCache=[],bookingCache=[],pendingAssignmentBookingId='';
+let operatorsCache=[],assignmentsCache=[],bookingCache=[],transferCache=[],pendingAssignmentBookingId='';
 async function loadOperators(){
  if(!adminToken)return;
  try{
@@ -257,7 +257,7 @@ async function loadAssignments(){
  try{
   const [rows,bookings,transfers]=await Promise.all([api('/api/v1/admin/operator_assignments'),api('/api/v1/admin/bookings'),api('/api/v1/admin/transfers')]);
   assignmentsCache=rows;bookingCache=bookings;transferCache=transfers;
-  $('assignmentBooking').innerHTML='<option value="">Select a request</option><optgroup label="Tour bookings">'+bookings.map(b=>'<option value="booking:'+b.id+'">'+escapeHtml(b.reference+' · '+b.customer_name+' · '+b.travel_date)+'</option>').join('')+'</optgroup><optgroup label="Transfer enquiries">'+transfers.map(t=>'<option value="transfer:'+t.id+'">'+escapeHtml(t.reference+' · '+(t.contact_name||'Customer')+' · '+t.travel_date)+'</option>').join('')+'</optgroup>';if(pendingAssignmentBookingId){$('assignmentBooking').value='booking:'+pendingAssignmentBookingId;pendingAssignmentBookingId=''}
+  $('assignmentBooking').innerHTML='<option value="">Select a request</option><optgroup label="Tour bookings">'+bookings.map(b=>'<option value="booking:'+b.id+'">'+escapeHtml(b.reference+' · '+b.customer_name+' · '+b.travel_date)+'</option>').join('')+'</optgroup><optgroup label="Transfer enquiries">'+transfers.map(t=>'<option value="transfer:'+t.id+'">'+escapeHtml(t.reference+' · '+(t.contact_name||'Customer')+' · '+t.travel_date)+'</option>').join('')+'</optgroup>';if(pendingAssignmentBookingId){$('assignmentBooking').value='booking:'+pendingAssignmentBookingId;pendingAssignmentBookingId='';$('assignmentBooking').dispatchEvent(new Event('change'))}
   $('operatorAssignmentRows').innerHTML=rows.length?rows.map(a=>{
    const statusOptions=['assigned','sent','accepted','declined','completed','cancelled','reassigned'].map(s=>'<option value="'+s+'" '+(a.status===s?'selected':'')+'>'+s.replace(/_/g,' ')+'</option>').join('');
    const margin=Number(a.estimated_margin_cents||0);
@@ -358,7 +358,7 @@ async function loadReports(){
   const marginRows=Array.isArray(r.estimated_margin_by_currency)?r.estimated_margin_by_currency:[];
   const outstandingRows=Array.isArray(r.operator_outstanding_by_currency)?r.operator_outstanding_by_currency:[];
   const formatTotals=rows=>rows.length?rows.map(x=>'<div class="crm-metric"><span>'+escapeHtml(x.currency)+'</span><b>'+escapeHtml(x.currency)+' '+(Number(x.total_cents)/100).toFixed(2)+'</b></div>').join(''):'<p class="crm-note">No records yet.</p>';
-  $('reportSupplierFinance').innerHTML='<b>Customer booking value</b>'+formatTotals(valueRows)+'<b>Active operator costs</b>'+formatTotals(costRows)+'<b>Estimated gross margin</b>'+formatTotals(marginRows)+'<b>Outstanding operator balances</b>'+formatTotals(outstandingRows);
+  $('reportSupplierFinance').innerHTML='<b>Customer booking / transfer value</b>'+formatTotals(valueRows)+'<b>Active operator costs</b>'+formatTotals(costRows)+'<b>Estimated gross margin</b>'+formatTotals(marginRows)+'<b>Outstanding operator balances</b>'+formatTotals(outstandingRows);
   const pct=(n,d)=>d?Math.round(n/d*100):0;
   const overviewTotal=Number(overview.bookings_total)||0,overviewConfirmed=Number(overview.bookings_confirmed)||0,overviewPaidBookings=Number(overview.paid_bookings_count)||0,overviewPayments=Number(overview.payments_paid)||0;
   $('crmBookingHealth').innerHTML='<div class="crm-metric"><span>Confirmed booking rate</span><b>'+pct(overviewConfirmed,overviewTotal)+'%</b></div><div class="crm-track"><i style="width:'+pct(overviewConfirmed,overviewTotal)+'%"></i></div><div class="crm-metric"><span>Paid booking rate</span><b>'+pct(overviewPaidBookings,overviewTotal)+'%</b></div><div class="crm-track"><i style="width:'+pct(overviewPaidBookings,overviewTotal)+'%"></i></div><div class="crm-metric"><span>Verified payment records</span><b>'+overviewPayments+'</b></div><p class="crm-note">Overview rates use all recorded bookings. Reports above use the selected reporting period.</p>';
