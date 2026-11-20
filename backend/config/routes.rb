@@ -7,6 +7,7 @@ Rails.application.routes.draw do
       resources :transport_enquiries, only: %i[create]
       namespace :admin do
         post "session", to: "sessions#create"
+        post "initial_setup", to: "initial_setup#create"
         resources :bookings, only: %i[index show update]
         resources :customers, only: %i[index]
         resources :payments, only: %i[index]
