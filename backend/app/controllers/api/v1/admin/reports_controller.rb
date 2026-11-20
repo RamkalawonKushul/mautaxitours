@@ -13,9 +13,10 @@ module Api
             { currency: currency, total_cents: total }
           end
 
-          booking_value = bookings.group(:currency).sum(:total_cents)
+          finance_bookings = bookings.where.not(status: "cancelled")
+          booking_value = finance_bookings.group(:currency).sum(:total_cents)
           active_assignments = OperatorAssignment.joins(:booking)
-                                                   .where(booking_id: bookings.select(:id))
+                                                   .where(booking_id: finance_bookings.select(:id))
                                                    .where.not(status: %w[declined cancelled reassigned])
           operator_costs = active_assignments.group(:currency).sum(:operator_cost_cents)
           operator_outstanding = active_assignments.group(:currency).sum("operator_cost_cents - operator_paid_cents")
