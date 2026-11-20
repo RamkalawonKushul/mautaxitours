@@ -43,6 +43,8 @@ module Api
           render json: { error: "Choose a customer request and an active operator." }, status: :unprocessable_entity
         rescue ActiveRecord::RecordInvalid => error
           render json: { errors: error.record.errors.full_messages }, status: :unprocessable_entity
+        rescue ActiveRecord::RecordNotFound
+          render json: { error: "The selected booking, transfer enquiry or active operator could not be found." }, status: :unprocessable_entity
         end
 
         def update

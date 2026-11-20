@@ -24,7 +24,7 @@ module Api
                                                             .where.not(status: %w[declined cancelled reassigned])
           transfer_value = active_transfer_assignments.group(:currency).sum(:customer_price_cents)
           customer_value = booking_value.merge(transfer_value) { |_currency, booking_total, transfer_total| booking_total + transfer_total }
-          assigned_booking_value = active_booking_assignments.joins(:booking).group("bookings.currency").sum("bookings.total_cents")
+          assigned_booking_value = active_booking_assignments.group("bookings.currency").sum("bookings.total_cents")
           assigned_customer_value = assigned_booking_value.merge(transfer_value) { |_currency, booking_total, transfer_total| booking_total + transfer_total }
           booking_costs = active_booking_assignments.group(:currency).sum(:operator_cost_cents)
           transfer_costs = active_transfer_assignments.group(:currency).sum(:operator_cost_cents)
