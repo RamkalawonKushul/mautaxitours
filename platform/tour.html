@@ -230,6 +230,8 @@ function updateLivePrice(forceBestFit=false){
 Object.values(paxInputs).forEach(el=>el.addEventListener('change',()=>updateLivePrice(true)));
 vehicleSelect.addEventListener('change',()=>updateLivePrice(false));
 updateLivePrice(false);
+// Refresh the rendered selector when the live API responds after initial rendering.
+window.applyLiveTourData=(liveTour)=>{if(!liveTour)return;Object.assign(t,liveTour);updateLivePrice(true);};
 function cartEscape(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 let tourCartReturnFocus=null;
 function readTourCart(){try{return JSON.parse(localStorage.getItem('mautaxi_cart_v2')||'[]')}catch(e){return []}}
@@ -275,8 +277,15 @@ if(window.MAUTAXI_API_URL){
   };
   window.MAUTAXI_TOURS=records.map(mapLiveTour);
   const current=window.MAUTAXI_TOURS.find(item=>item.id===id);
-  if(current&&!cachedDetail){sessionStorage.setItem('mautaxi_live_tour_'+id,JSON.stringify(current));location.reload()}
- }).catch(()=>{});
+  if(current){
+   sessionStorage.setItem('mautaxi_live_tour_'+id,JSON.stringify(current));
+   if(typeof window.applyLiveTourData==='function')window.applyLiveTourData(current);
+  }
+ }).catch(error=>{
+  console.error('MauTaxi live tour/vehicle prices could not be loaded:',error);
+  const select=document.getElementById('tourVehicle');
+  if(select&&!select.options.length)select.innerHTML='<option value="">Vehicle prices temporarily unavailable — please refresh</option>';
+ });
 }
 function showMyTripAdded(message){
  const fab=document.getElementById('openCart')||document.getElementById('tourCartFab');
