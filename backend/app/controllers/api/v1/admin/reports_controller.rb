@@ -3,8 +3,11 @@ module Api
     module Admin
       class ReportsController < BaseController
         def show
-          bookings = apply_date_filter(Booking.all, :created_at)
-          verified_payments = apply_date_filter(Payment.where(status: "succeeded").where.not(paid_at: nil), :paid_at)
+          range = requested_date_range
+          return if performed?
+
+          bookings = apply_date_filter(Booking.all, :created_at, range)
+          verified_payments = apply_date_filter(Payment.where(status: "succeeded").where.not(paid_at: nil), :paid_at, range)
 
           revenue = verified_payments.group(:currency).sum(:amount_cents).map do |currency, total|
             { currency: currency, total_cents: total }
@@ -17,9 +20,9 @@ module Api
             bookings_cancelled: bookings.cancelled.count,
             paid_bookings_count: bookings.paid.count,
             payments_paid: verified_payments.count,
-            unresolved_payments_count: apply_date_filter(Payment.where(status: %w[initiated awaiting_customer processing]), :created_at).count,
-            failed_payments_count: apply_date_filter(Payment.where(status: "failed"), :created_at).count,
-            refunded_payments_count: apply_date_filter(Payment.where(status: "refunded"), :created_at).count,
+            unresolved_payments_count: apply_date_filter(Payment.where(status: %w[initiated awaiting_customer processing]), :created_at, range).count,
+            failed_payments_count: apply_date_filter(Payment.where(status: "failed"), :created_at, range).count,
+            refunded_payments_count: apply_date_filter(Payment.where(status: "refunded"), :created_at, range).count,
             revenue_by_currency: revenue,
             recent_bookings: bookings.order(created_at: :desc).limit(10).map do |booking|
               {
@@ -37,27 +40,29 @@ module Api
 
         private
 
-        def apply_date_filter(scope, field)
-          start_date = parse_date(params[:start_date])
-          end_date = parse_date(params[:end_date])
-          if params[:period] == "day"
-            start_date ||= Date.current
-            end_date ||= start_date
-          elsif params[:period] == "month"
-            start_date ||= Date.current.beginning_of_month
-            end_date ||= Date.current.end_of_month
-          elsif params[:period] == "year"
-            start_date ||= Date.current.beginning_of_year
-            end_date ||= Date.current.end_of_year
-          end
-          scope = scope.where(field => start_date.beginning_of_day..) if start_date
-          scope = scope.where(field => ..end_date.end_of_day) if end_date
-          scope
+        def apply_date_filter(scope, field, range)
+          return scope unless range
+          start_date, end_date = range
+          scope.where(field => start_date.beginning_of_day..end_date.end_of_day)
         end
 
-        def parse_date(value)
-          Date.iso8601(value) if value.present?
-        rescue Date::Error
+        def requested_date_range
+          today = Date.current
+          case params[:period].to_s
+          when "day" then [today, today]
+          when "month" then [today.beginning_of_month, today.end_of_month]
+          when "year" then [today.beginning_of_year, today.end_of_year]
+          when "custom"
+            raise ArgumentError unless params[:start_date].present? && params[:end_date].present?
+            start_date = Date.iso8601(params[:start_date])
+            end_date = Date.iso8601(params[:end_date])
+            raise ArgumentError if start_date > end_date
+            [start_date, end_date]
+          else
+            nil
+          end
+        rescue ArgumentError
+          render json: { error: "Choose a valid date range. The start date must be on or before the end date." }, status: :unprocessable_entity
           nil
         end
       end
