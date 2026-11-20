@@ -35,6 +35,33 @@ class Api::V1::Admin::OperatorManagementControllerTest < ActionDispatch::Integra
     assert_equal 20_000, response.parsed_body.fetch("estimated_margin_cents")
   end
 
+
+  test "administrator can assign a transfer enquiry and records the expected margin" do
+    enquiry = TransportEnquiry.create!(
+      pickup_location: "Airport",
+      destination: "Grand Baie",
+      travel_date: Date.current + 10.days,
+      pickup_time: "10:00",
+      passengers: 3,
+      contact_name: "Transfer Customer",
+      contact_email: "transfer@example.com"
+    )
+
+    post "/api/v1/admin/operator_assignments",
+         params: { operator_assignment: {
+           transport_enquiry_id: enquiry.id,
+           operator_id: @operator.id,
+           operator_cost_cents: 20_000,
+           customer_price_cents: 35_000,
+           currency: "MUR"
+         } },
+         headers: @headers,
+         as: :json
+
+    assert_response :created
+    assert_equal 15_000, response.parsed_body.fetch("estimated_margin_cents")
+  end
+
   test "operator assignment rejects a cost in a different currency" do
     post "/api/v1/admin/operator_assignments",
          params: { operator_assignment: {

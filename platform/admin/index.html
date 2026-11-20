@@ -165,6 +165,7 @@ tbody tr:hover{background:#f7fbff}
    <div class="field"><label>Booking *</label><select id="assignmentBooking" required><option value="">Select a booking</option></select></div>
    <div class="field"><label>Operator *</label><select id="assignmentOperator" required><option value="">Select an active operator</option></select></div>
    <div class="field"><label>Agreed operator cost *</label><input id="assignmentCost" type="number" min="0" step="0.01" required placeholder="0.00"></div>
+   <div class="field"><label>Customer selling price <small>(required for transfer enquiries)</small></label><input id="assignmentCustomerPrice" type="number" min="0" step="0.01" placeholder="Auto-filled for tour bookings"></div>
    <div class="field"><label>Currency</label><select id="assignmentCurrency"><option>EUR</option><option>MUR</option><option>GBP</option><option>USD</option></select></div>
    <div class="field full"><label>Internal / trip instructions</label><textarea id="assignmentNotes" rows="3" placeholder="Pickup time, meeting point, luggage, child seats, special requirements..."></textarea></div>
    <div class="field full"><button class="btn" type="submit">＋ Create operator assignment</button></div>
@@ -172,7 +173,7 @@ tbody tr:hover{background:#f7fbff}
  </div>
  <div class="panel" style="margin-top:18px">
   <div class="panel-head"><div><h3>Operator assignments & payments</h3><small>Track sent/accepted trips, agreed supplier costs and outstanding operator payments.</small></div></div>
-  <div class="table-wrap"><table><thead><tr><th>BOOKING / TRAVEL</th><th>OPERATOR</th><th>SELLING PRICE</th><th>OPERATOR COST</th><th>EST. MARGIN</th><th>TRIP STATUS</th><th>PAID TO OPERATOR</th><th>ACTIONS</th></tr></thead><tbody id="operatorAssignmentRows"><tr><td colspan="8">Sign in to load assignments.</td></tr></tbody></table></div>
+  <div class="table-wrap"><table><thead><tr><th>BOOKING / TRANSFER</th><th>OPERATOR</th><th>SELLING PRICE</th><th>OPERATOR COST</th><th>EST. MARGIN</th><th>TRIP STATUS</th><th>PAID TO OPERATOR</th><th>ACTIONS</th></tr></thead><tbody id="operatorAssignmentRows"><tr><td colspan="8">Sign in to load assignments.</td></tr></tbody></table></div>
  </div>
 </section>
 <section class="section-view" id="tours"><div class="welcome"><div><h1>Tours & prices</h1><p>Live catalogue records from your database.</p></div><button class="btn" onclick="show('content')">＋ Manage tours</button></div><div class="panel"><div class="panel-head"><h3>Experiences</h3><small id="tourOverviewCount"></small></div><div class="table-wrap"><table><thead><tr><th>TOUR</th><th>CATEGORY</th><th>DURATION</th><th>TRANSPORT</th><th>ACTIVITY</th><th>EDIT</th></tr></thead><tbody id="adminTourRows"></tbody></table></div></div></section>
@@ -254,9 +255,9 @@ $('operatorSearch').addEventListener('input',()=>{const q=$('operatorSearch').va
 async function loadAssignments(){
  if(!adminToken)return;
  try{
-  const [rows,bookings]=await Promise.all([api('/api/v1/admin/operator_assignments'),api('/api/v1/admin/bookings')]);
-  assignmentsCache=rows;bookingCache=bookings;
-  $('assignmentBooking').innerHTML='<option value="">Select a booking</option>'+bookings.map(b=>'<option value="'+b.id+'">'+escapeHtml(b.reference+' · '+b.customer_name+' · '+b.travel_date)+'</option>').join('');if(pendingAssignmentBookingId){$('assignmentBooking').value=pendingAssignmentBookingId;pendingAssignmentBookingId=''}
+  const [rows,bookings,transfers]=await Promise.all([api('/api/v1/admin/operator_assignments'),api('/api/v1/admin/bookings'),api('/api/v1/admin/transfers')]);
+  assignmentsCache=rows;bookingCache=bookings;transferCache=transfers;
+  $('assignmentBooking').innerHTML='<option value="">Select a request</option><optgroup label="Tour bookings">'+bookings.map(b=>'<option value="booking:'+b.id+'">'+escapeHtml(b.reference+' · '+b.customer_name+' · '+b.travel_date)+'</option>').join('')+'</optgroup><optgroup label="Transfer enquiries">'+transfers.map(t=>'<option value="transfer:'+t.id+'">'+escapeHtml(t.reference+' · '+(t.contact_name||'Customer')+' · '+t.travel_date)+'</option>').join('')+'</optgroup>';if(pendingAssignmentBookingId){$('assignmentBooking').value='booking:'+pendingAssignmentBookingId;pendingAssignmentBookingId=''}
   $('operatorAssignmentRows').innerHTML=rows.length?rows.map(a=>{
    const statusOptions=['assigned','sent','accepted','declined','completed','cancelled','reassigned'].map(s=>'<option value="'+s+'" '+(a.status===s?'selected':'')+'>'+s.replace(/_/g,' ')+'</option>').join('');
    const margin=Number(a.estimated_margin_cents||0);
@@ -271,12 +272,18 @@ async function loadAssignments(){
   $('operatorAssignmentRows').querySelectorAll('[data-assignment-whatsapp]').forEach(b=>b.onclick=()=>openOperatorWhatsApp(Number(b.dataset.assignmentWhatsapp)));$('operatorAssignmentRows').querySelectorAll('[data-assignment-email]').forEach(b=>b.onclick=()=>openOperatorEmail(Number(b.dataset.assignmentEmail)));
  }catch(error){$('operatorAssignmentRows').innerHTML='<tr><td colspan="8" style="color:#a34b4b;padding:20px">'+escapeHtml(error.message)+'</td></tr>'}
 }
-$('assignmentBooking').addEventListener('change',()=>{const booking=bookingCache.find(b=>String(b.id)===$('assignmentBooking').value);if(booking)$('assignmentCurrency').value=booking.currency||'EUR'});
+$('assignmentBooking').addEventListener('change',()=>{
+ const [type,id]=String($('assignmentBooking').value||'').split(':');
+ if(type==='booking'){const booking=bookingCache.find(b=>String(b.id)===id);if(booking){$('assignmentCurrency').value=booking.currency||'EUR';$('assignmentCustomerPrice').value=(Number(booking.total_cents)/100).toFixed(2);$('assignmentCustomerPrice').readOnly=true}}
+ else if(type==='transfer'){$('assignmentCurrency').value='MUR';$('assignmentCustomerPrice').value='';$('assignmentCustomerPrice').readOnly=false}
+});
 $('assignmentForm').onsubmit=async e=>{
  e.preventDefault();
- const values={booking_id:Number($('assignmentBooking').value),operator_id:Number($('assignmentOperator').value),operator_cost_cents:Math.round(Number($('assignmentCost').value)*100),currency:$('assignmentCurrency').value,notes:$('assignmentNotes').value.trim()};
- if(!values.booking_id||!values.operator_id||!Number.isFinite(values.operator_cost_cents)||values.operator_cost_cents<0){alert('Choose a booking, an active operator and a valid cost.');return}
- try{await api('/api/v1/admin/operator_assignments',{method:'POST',body:JSON.stringify({operator_assignment:values})});$('assignmentCost').value='';$('assignmentNotes').value='';await loadAssignments();alert('Operator assignment created. Review the trip details and send them manually to the operator.')}catch(error){alert(error.message)}
+ const [requestType,requestId]=String($('assignmentBooking').value||'').split(':');
+ const values={operator_id:Number($('assignmentOperator').value),operator_cost_cents:Math.round(Number($('assignmentCost').value)*100),customer_price_cents:Math.round(Number($('assignmentCustomerPrice').value)*100),currency:$('assignmentCurrency').value,notes:$('assignmentNotes').value.trim()};
+ if(requestType==='booking')values.booking_id=Number(requestId);else if(requestType==='transfer')values.transport_enquiry_id=Number(requestId);
+ if(!requestId||!values.operator_id||!Number.isFinite(values.operator_cost_cents)||values.operator_cost_cents<0||(requestType==='transfer'&&(!Number.isFinite(values.customer_price_cents)||values.customer_price_cents<=0))){alert('Choose a booking or transfer enquiry, an active operator and valid prices.');return}
+ try{await api('/api/v1/admin/operator_assignments',{method:'POST',body:JSON.stringify({operator_assignment:values})});$('assignmentCost').value='';$('assignmentCustomerPrice').value='';$('assignmentCustomerPrice').readOnly=false;$('assignmentNotes').value='';await loadAssignments();alert('Operator assignment created. Review the trip details and send them manually to the operator.')}catch(error){alert(error.message)}
 };
 function openOperatorEmail(id){
  const a=assignmentsCache.find(x=>x.id===id);if(!a)return;

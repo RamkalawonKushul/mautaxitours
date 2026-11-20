@@ -1,5 +1,6 @@
 class OperatorAssignment < ApplicationRecord
-  belongs_to :booking
+  belongs_to :booking, optional: true
+  belongs_to :transport_enquiry, optional: true
   belongs_to :operator
 
   STATUSES = %w[assigned sent accepted declined completed cancelled reassigned].freeze
@@ -9,7 +10,9 @@ class OperatorAssignment < ApplicationRecord
   validates :payment_status, inclusion: { in: PAYMENT_STATUSES }
   validates :operator_cost_cents, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
   validates :operator_paid_cents, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
+  validates :customer_price_cents, numericality: { only_integer: true, greater_than: 0 }, if: :transport_enquiry_id?
   validates :currency, format: { with: /\A[A-Z]{3}\z/ }
+  validate :exactly_one_customer_request
   validate :paid_amount_does_not_exceed_cost
 
   before_validation :normalise_currency
@@ -17,6 +20,10 @@ class OperatorAssignment < ApplicationRecord
   before_validation :stamp_workflow_dates
 
   private
+
+  def exactly_one_customer_request
+    errors.add(:base, "An assignment must belong to exactly one booking or transfer enquiry") if booking_id.present? == transport_enquiry_id.present?
+  end
 
   def normalise_currency
     self.currency = currency.to_s.upcase
@@ -40,8 +47,6 @@ class OperatorAssignment < ApplicationRecord
   end
 
   def paid_amount_does_not_exceed_cost
-    return unless operator_paid_cents.to_i > operator_cost_cents.to_i
-
-    errors.add(:operator_paid_cents, "cannot exceed the agreed operator cost")
+    errors.add(:operator_paid_cents, "cannot exceed the agreed operator cost") if operator_paid_cents.to_i > operator_cost_cents.to_i
   end
 end

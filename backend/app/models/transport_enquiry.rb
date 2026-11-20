@@ -1,4 +1,6 @@
 class TransportEnquiry < ApplicationRecord
+  has_many :operator_assignments, dependent: :restrict_with_error
+
   enum :status, { new: "new", contacted: "contacted", quoted: "quoted", confirmed: "confirmed", cancelled: "cancelled" }, prefix: true
 
   validates :reference, presence: true, uniqueness: true
