@@ -28,7 +28,7 @@ services:
           name: mautaxi-postgres-trial
           property: connectionString
       - key: CORS_ORIGINS
-        value: https://mautaxitours.com,https://www.mautaxitours.com,https://mautaxitours.vercel.app
+        value: https://mautaxitours.com,https://www.mautaxitours.com,https://mautaxitours.vercel.app,https://mautaxitours-7xw5awmwl-akshay-ramkalawons-projects.vercel.app
       - key: APP_HOST
         value: www.mautaxitours.com
 
