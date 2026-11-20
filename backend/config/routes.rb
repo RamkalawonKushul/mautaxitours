@@ -15,7 +15,9 @@ Rails.application.routes.draw do
         resources :operators, only: %i[index create update destroy]
         resources :operator_assignments, only: %i[index create update]
         resource :reports, only: %i[show]
-        resources :tours, only: %i[index show create update destroy]
+        resources :tours, only: %i[index show create update destroy] do
+          resources :vehicle_prices, controller: "tour_vehicle_prices", only: %i[index create update destroy]
+        end
         resources :vehicle_options, path: "vehicles", only: %i[index create update destroy]
       end
       get "vehicles", to: "vehicles#index"
