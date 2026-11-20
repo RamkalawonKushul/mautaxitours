@@ -3,6 +3,7 @@ module Api
     class TransportEnquiriesController < ApplicationController
       def create
         enquiry = TransportEnquiry.create!(enquiry_params)
+        send_admin_notification(enquiry)
         render json: {
           reference: enquiry.reference,
           status: enquiry.status,
@@ -13,6 +14,14 @@ module Api
       end
 
       private
+
+      def send_admin_notification(enquiry)
+        return unless Rails.env.production? && ENV["SMTP_ADDRESS"].present? && ENV["ADMIN_NOTIFICATION_EMAIL"].present?
+
+        TransportEnquiryMailer.admin_notification(enquiry).deliver_now
+      rescue StandardError => error
+        Rails.logger.error("Transfer enquiry notification failed for #{enquiry.reference}: #{error.class}: #{error.message}")
+      end
 
       def enquiry_params
         params.require(:transport_enquiry).permit(
