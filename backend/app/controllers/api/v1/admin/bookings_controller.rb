@@ -5,6 +5,9 @@ module Api
         def index
           bookings = Booking.includes(booking_items: :tour).order(created_at: :desc)
           bookings = bookings.where(status: params[:status]) if Booking.statuses.key?(params[:status].to_s)
+          bookings = apply_travel_date_filter(bookings)
+          return if performed?
+
           if params[:q].present?
             term = "%#{ActiveRecord::Base.sanitize_sql_like(params[:q].to_s.strip)}%"
             bookings = bookings.where(
@@ -45,6 +48,37 @@ module Api
         end
 
         private
+
+        def apply_travel_date_filter(scope)
+          range = requested_date_range
+          return scope unless range
+          start_date, end_date = range
+          scope.left_joins(:booking_items)
+               .where("bookings.travel_date BETWEEN :start_date AND :end_date OR booking_items.travel_date BETWEEN :start_date AND :end_date",
+                      start_date: start_date, end_date: end_date)
+               .distinct
+        rescue ArgumentError
+          render json: { error: "Choose a valid date range. The start date must be on or before the end date." }, status: :unprocessable_entity
+          nil
+        end
+
+        def requested_date_range
+          period = params[:period].to_s
+          today = Date.current
+          case period
+          when "day" then [today, today]
+          when "month" then [today.beginning_of_month, today.end_of_month]
+          when "year" then [today.beginning_of_year, today.end_of_year]
+          when "custom"
+            raise ArgumentError unless params[:start_date].present? && params[:end_date].present?
+            start_date = Date.iso8601(params[:start_date])
+            end_date = Date.iso8601(params[:end_date])
+            raise ArgumentError if start_date > end_date
+            [start_date, end_date]
+          else
+            nil
+          end
+        end
 
         def serialize(booking)
           {
