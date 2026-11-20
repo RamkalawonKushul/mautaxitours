@@ -18,6 +18,13 @@ class Api::V1::BookingsControllerTest < ActionDispatch::IntegrationTest
       currency: "MUR",
       active: true
     )
+    @tour_vehicle_price = TourVehiclePrice.create!(
+      tour: @tour,
+      vehicle_option: @vehicle,
+      price_cents: 10_500,
+      currency: "MUR",
+      active: true
+    )
     @payload = {
       booking: {
         customer_name: "Test Guest",
@@ -51,6 +58,23 @@ class Api::V1::BookingsControllerTest < ActionDispatch::IntegrationTest
     assert_equal 15_500, response_body.fetch("total_cents")
     assert_equal "pending", response_body.fetch("status")
     assert_equal "unpaid", response_body.fetch("payment_status")
+  end
+
+  test "uses the exact price configured for this tour and vehicle" do
+    @tour_vehicle_price.update!(price_cents: 12_500)
+    post api_v1_bookings_url, params: @payload, as: :json
+    assert_response :created
+    assert_equal 17_500, response.parsed_body.fetch("total_cents")
+    assert_equal 12_500, response.parsed_body.fetch("items").first.fetch("transport_cents")
+  end
+
+  test "rejects a vehicle without a price configured for the selected tour" do
+    @tour_vehicle_price.destroy!
+    assert_no_difference("Booking.count") do
+      post api_v1_bookings_url, params: @payload, as: :json
+    end
+    assert_response :bad_request
+    assert_match(/not currently priced/i, response.parsed_body.fetch("error"))
   end
 
   test "retries with the same idempotency key do not create duplicate bookings" do
