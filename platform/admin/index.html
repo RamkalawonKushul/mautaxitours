@@ -180,7 +180,7 @@ function closeBookingDetails(){$('bookingDetailModal').style.display='none';docu
 async function loadCustomers(){
  if(!adminToken)return;
  try{
-  const q=encodeURIComponent($('customerSearch')?.value||''),period=encodeURIComponent($('customerPeriod')?.value||'all'),from=encodeURIComponent($('customerFrom')?.value||''),to=encodeURIComponent($('customerTo')?.value||'');
+  const q=encodeURIComponent($('customerSearch')?.value||''),selectedPeriod=$('customerPeriod')?.value||'all',period=encodeURIComponent(selectedPeriod),from=encodeURIComponent(selectedPeriod==='custom'?($('customerFrom')?.value||''):''),to=encodeURIComponent(selectedPeriod==='custom'?($('customerTo')?.value||''):'' );
   const rows=await api('/api/v1/admin/customers?q='+q+'&period='+period+'&start_date='+from+'&end_date='+to);
   $('adminCustomerRows').innerHTML=rows.length?rows.map(c=>'<tr><td><b>'+escapeHtml(c.customer_name)+'</b><br><small>'+escapeHtml(c.customer_email)+'</small></td><td>'+escapeHtml(c.customer_phone||'—')+'</td><td>'+c.bookings_count+'</td><td>'+escapeHtml(c.last_booking_at?new Date(c.last_booking_at).toLocaleDateString():'—')+'</td><td>'+c.totals_by_currency.map(x=>escapeHtml(x.currency)+' '+(Number(x.total_cents)/100).toFixed(2)).join('<br>')+'</td><td>'+c.references.map(escapeHtml).join('<br>')+'</td></tr>').join(''):'<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted)">No customers found in this period.</td></tr>';
  }catch(error){$('adminCustomerRows').innerHTML='<tr><td colspan="6" style="text-align:center;padding:24px;color:#a34b4b">'+escapeHtml(error.message)+'</td></tr>'}
@@ -216,7 +216,7 @@ async function loadTransfers(){
  }catch(error){$('adminTransferRows').innerHTML='<tr><td colspan="7" style="text-align:center;padding:24px;color:#a34b4b">'+escapeHtml(error.message)+'</td></tr>'}
 }
 function periodQuery(prefix){
- const period=$(prefix+'Period')?.value||'all',from=$(prefix+'From')?.value||'',to=$(prefix+'To')?.value||'';
+ const period=$(prefix+'Period')?.value||'all',from=period==='custom'?($(prefix+'From')?.value||''):'',to=period==='custom'?($(prefix+'To')?.value||''):'';
  return '&period='+encodeURIComponent(period)+'&start_date='+encodeURIComponent(from)+'&end_date='+encodeURIComponent(to);
 }
 async function loadReports(){
