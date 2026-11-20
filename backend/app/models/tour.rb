@@ -1,6 +1,7 @@
 class Tour < ApplicationRecord
   belongs_to :tour_category, optional: true
   has_many :booking_items, dependent: :restrict_with_exception
+  has_many :tour_vehicle_prices, dependent: :destroy
 
   validates :name, presence: true
   validates :slug, presence: true, uniqueness: true
