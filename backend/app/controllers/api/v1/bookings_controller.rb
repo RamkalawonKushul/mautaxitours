@@ -46,10 +46,12 @@ module Api
             vehicle = VehicleOption.active.find_by(name: vehicle_name)
             raise ActionController::BadRequest, "The selected vehicle is no longer available. Please refresh and try again." unless vehicle
             raise ActionController::BadRequest, "Selected vehicle cannot carry this group size" if vehicle.capacity < travellers
-            raise ActionController::BadRequest, "Vehicle and tour currencies must match" unless vehicle.currency == tour.currency
+            price = tour.tour_vehicle_prices.active.find_by(vehicle_option: vehicle)
+            raise ActionController::BadRequest, "This vehicle is not currently priced for the selected tour. Please choose another option." unless price
+            raise ActionController::BadRequest, "Vehicle price and tour activity currencies must match" unless price.currency == tour.currency
 
-            transport_cents = tour.price_cents
-            upgrade_cents = vehicle.upgrade_cents
+            transport_cents = price.price_cents
+            upgrade_cents = 0
             adult_activity_cents = (tour.adult_price_cents || 0) * adults
             child_activity_cents = (tour.child_price_cents || 0) * children
             activity_cents = adult_activity_cents + child_activity_cents
