@@ -15,7 +15,7 @@ module Api
           email = admin_params.require(:email).to_s.strip.downcase
           password = admin_params.require(:password).to_s
 
-          return render json: { error: "A valid email address is required" }, status: :unprocessable_entity unless email.match?(/\\A[^@\\s]+@[^@\\s]+\\.[^@\\s]+\\z/)
+          return render json: { error: "A valid email address is required" }, status: :unprocessable_entity unless email.match?(/\A[^@\s]+@[^@\s]+\.[^@\s]+\z/)
           return render json: { error: "Password must contain at least 14 characters" }, status: :unprocessable_entity if password.length < 14
 
           user = nil
