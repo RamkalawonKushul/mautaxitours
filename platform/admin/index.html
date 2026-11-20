@@ -206,7 +206,7 @@ async function loadBookings(){
   }).join(''):'<tr><td colspan="8" style="color:var(--muted);text-align:center;padding:24px">No bookings match these filters.</td></tr>';
   $('overviewBookingRows').innerHTML=overviewRows.slice(0,6).map(b=>'<tr><td><b>'+escapeHtml(b.reference)+'</b></td><td>'+escapeHtml(b.customer_name)+'</td><td>'+escapeHtml((b.items||[]).map(x=>x.tour).join(', '))+'</td><td>'+escapeHtml(b.travel_date||'—')+'</td><td>'+escapeHtml(b.status)+'</td></tr>').join('')||'<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--muted)">No bookings recorded yet.</td></tr>';
   $('adminBookingRows').querySelectorAll('[data-view-booking]').forEach(button=>button.onclick=()=>openBookingDetails(button.dataset.viewBooking));
-  $('adminBookingRows').querySelectorAll('[data-assign-booking]').forEach(button=>button.onclick=async()=>{await loadOperators();await loadAssignments();show('operators');$('assignmentBooking').value=button.dataset.assignBooking});
+  $('adminBookingRows').querySelectorAll('[data-assign-booking]').forEach(button=>button.onclick=async()=>{pendingAssignmentBookingId=button.dataset.assignBooking;show('operators')});
   $('adminBookingRows').querySelectorAll('[data-save-booking]').forEach(button=>button.onclick=async()=>{
    const id=button.dataset.saveBooking,status=$('adminBookingRows').querySelector('[data-booking-status="'+id+'"]').value;button.disabled=true;
    try{await api('/api/v1/admin/bookings/'+id,{method:'PATCH',body:JSON.stringify({booking:{status}})});await Promise.all([loadBookings(),loadReports(),loadCustomers()])}
@@ -223,7 +223,7 @@ async function openBookingDetails(id){
  }catch(error){alert(error.message)}
 }
 function closeBookingDetails(){$('bookingDetailModal').style.display='none';document.body.style.overflow=''}
-let operatorsCache=[],assignmentsCache=[],bookingCache=[];
+let operatorsCache=[],assignmentsCache=[],bookingCache=[],pendingAssignmentBookingId='';
 async function loadOperators(){
  if(!adminToken)return;
  try{
@@ -256,11 +256,11 @@ async function loadAssignments(){
  try{
   const [rows,bookings]=await Promise.all([api('/api/v1/admin/operator_assignments'),api('/api/v1/admin/bookings')]);
   assignmentsCache=rows;bookingCache=bookings;
-  $('assignmentBooking').innerHTML='<option value="">Select a booking</option>'+bookings.map(b=>'<option value="'+b.id+'">'+escapeHtml(b.reference+' · '+b.customer_name+' · '+b.travel_date)+'</option>').join('');
+  $('assignmentBooking').innerHTML='<option value="">Select a booking</option>'+bookings.map(b=>'<option value="'+b.id+'">'+escapeHtml(b.reference+' · '+b.customer_name+' · '+b.travel_date)+'</option>').join('');if(pendingAssignmentBookingId){$('assignmentBooking').value=pendingAssignmentBookingId;pendingAssignmentBookingId=''}
   $('operatorAssignmentRows').innerHTML=rows.length?rows.map(a=>{
    const statusOptions=['assigned','sent','accepted','declined','completed','cancelled','reassigned'].map(s=>'<option value="'+s+'" '+(a.status===s?'selected':'')+'>'+s.replace(/_/g,' ')+'</option>').join('');
    const margin=Number(a.estimated_margin_cents||0);
-   return '<tr><td><b>'+escapeHtml(a.booking.reference)+'</b><br><small>'+escapeHtml(a.booking.customer_name)+' · '+escapeHtml(a.booking.travel_date||'')+'</small></td><td><b>'+escapeHtml(a.operator.name)+'</b><br><small>'+escapeHtml(a.operator.contact_person||'')+'</small></td><td>'+escapeHtml(a.booking.currency)+' '+(Number(a.booking.total_cents)/100).toFixed(2)+'</td><td><input type="number" min="0" step=".01" data-assignment-cost="'+a.id+'" value="'+(Number(a.operator_cost_cents)/100).toFixed(2)+'"></td><td><b>'+escapeHtml(a.currency)+' '+(margin/100).toFixed(2)+'</b><br><small>All active suppliers</small></td><td><select data-assignment-status="'+a.id+'">'+statusOptions+'</select></td><td><input type="number" min="0" step=".01" data-assignment-paid="'+a.id+'" value="'+(Number(a.operator_paid_cents)/100).toFixed(2)+'"><br><small>'+escapeHtml(a.payment_status.replace(/_/g,' '))+'</small></td><td><div class="toolrow"><button class="btn secondary" type="button" data-assignment-save="'+a.id+'">Save</button><button class="btn secondary" type="button" data-assignment-whatsapp="'+a.id+'">WhatsApp</button></div></td></tr>';
+   return '<tr><td><b>'+escapeHtml(a.booking.reference)+'</b><br><small>'+escapeHtml(a.booking.customer_name)+' · '+escapeHtml(a.booking.travel_date||'')+'</small></td><td><b>'+escapeHtml(a.operator.name)+'</b><br><small>'+escapeHtml(a.operator.contact_person||'')+'</small></td><td>'+escapeHtml(a.booking.currency)+' '+(Number(a.booking.total_cents)/100).toFixed(2)+'</td><td><input type="number" min="0" step=".01" data-assignment-cost="'+a.id+'" value="'+(Number(a.operator_cost_cents)/100).toFixed(2)+'"></td><td><b>'+escapeHtml(a.currency)+' '+(margin/100).toFixed(2)+'</b><br><small>All active suppliers</small></td><td><select data-assignment-status="'+a.id+'">'+statusOptions+'</select></td><td><input type="number" min="0" step=".01" data-assignment-paid="'+a.id+'" value="'+(Number(a.operator_paid_cents)/100).toFixed(2)+'"><br><small>'+escapeHtml(a.payment_status.replace(/_/g,' '))+'</small></td><td><div class="toolrow"><button class="btn secondary" type="button" data-assignment-save="'+a.id+'">Save</button><button class="btn secondary" type="button" data-assignment-whatsapp="'+a.id+'">WhatsApp</button><button class="btn secondary" type="button" data-assignment-email="'+a.id+'">Email</button></div></td></tr>';
   }).join(''):'<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--muted)">No operator assignments yet.</td></tr>';
   $('operatorAssignmentRows').querySelectorAll('[data-assignment-save]').forEach(b=>b.onclick=async()=>{
    const id=b.dataset.assignmentSave,old=assignmentsCache.find(x=>x.id===Number(id));
@@ -268,19 +268,27 @@ async function loadAssignments(){
    if(!Number.isFinite(cost)||!Number.isFinite(paid)||cost<0||paid<0){alert('Enter valid non-negative amounts.');return}
    try{await api('/api/v1/admin/operator_assignments/'+id,{method:'PATCH',body:JSON.stringify({operator_assignment:{status,operator_cost_cents:Math.round(cost*100),operator_paid_cents:Math.round(paid*100),currency:old.currency}})});await loadAssignments()}catch(error){alert(error.message)}
   });
-  $('operatorAssignmentRows').querySelectorAll('[data-assignment-whatsapp]').forEach(b=>b.onclick=()=>openOperatorWhatsApp(Number(b.dataset.assignmentWhatsapp)));
+  $('operatorAssignmentRows').querySelectorAll('[data-assignment-whatsapp]').forEach(b=>b.onclick=()=>openOperatorWhatsApp(Number(b.dataset.assignmentWhatsapp)));$('operatorAssignmentRows').querySelectorAll('[data-assignment-email]').forEach(b=>b.onclick=()=>openOperatorEmail(Number(b.dataset.assignmentEmail)));
  }catch(error){$('operatorAssignmentRows').innerHTML='<tr><td colspan="8" style="color:#a34b4b;padding:20px">'+escapeHtml(error.message)+'</td></tr>'}
 }
+$('assignmentBooking').addEventListener('change',()=>{const booking=bookingCache.find(b=>String(b.id)===$('assignmentBooking').value);if(booking)$('assignmentCurrency').value=booking.currency||'EUR'});
 $('assignmentForm').onsubmit=async e=>{
  e.preventDefault();
  const values={booking_id:Number($('assignmentBooking').value),operator_id:Number($('assignmentOperator').value),operator_cost_cents:Math.round(Number($('assignmentCost').value)*100),currency:$('assignmentCurrency').value,notes:$('assignmentNotes').value.trim()};
  if(!values.booking_id||!values.operator_id||!Number.isFinite(values.operator_cost_cents)||values.operator_cost_cents<0){alert('Choose a booking, an active operator and a valid cost.');return}
  try{await api('/api/v1/admin/operator_assignments',{method:'POST',body:JSON.stringify({operator_assignment:values})});$('assignmentCost').value='';$('assignmentNotes').value='';await loadAssignments();alert('Operator assignment created. Review the trip details and send them manually to the operator.')}catch(error){alert(error.message)}
 };
+function openOperatorEmail(id){
+ const a=assignmentsCache.find(x=>x.id===id);if(!a)return;
+ if(!a.operator.email){alert('Add an email address to this operator first.');return}
+ const b=a.booking,items=(b.items||[]).map(x=>x.tour+' — '+x.travel_date+' — '+(Number(x.adults||0)+Number(x.children||0)+Number(x.babies||0))+' passengers; vehicle: '+(x.vehicle||'to be advised')).join('\n');
+ const body='MAUTAXI TOURS — TRIP REQUEST\nBooking: '+b.reference+'\nCustomer: '+b.customer_name+'\nContact: '+(b.customer_phone||'')+' / '+b.customer_email+'\nTravel date: '+b.travel_date+'\nPickup: '+(b.pickup_details||'To be confirmed')+'\nExperiences:\n'+items+'\nSpecial requests: '+(b.special_requests||'None')+'\nOperator instructions: '+(a.notes||'None')+'\nAgreed operator cost: '+a.currency+' '+(Number(a.operator_cost_cents)/100).toFixed(2)+'\nPlease confirm availability and acceptance.';
+ window.location.href='mailto:'+encodeURIComponent(a.operator.email)+'?subject='+encodeURIComponent('MauTaxi Tours trip request — '+b.reference)+'&body='+encodeURIComponent(body);
+}
 function openOperatorWhatsApp(id){
  const a=assignmentsCache.find(x=>x.id===id);if(!a)return;
  const b=a.booking,items=(b.items||[]).map(x=>x.tour+' — '+x.travel_date+' — '+(Number(x.adults||0)+Number(x.children||0)+Number(x.babies||0))+' passengers; vehicle: '+(x.vehicle||'to be advised')).join('\n');
- const message='MAUTAXI TOURS — TRIP REQUEST\nBooking: '+b.reference+'\nCustomer: '+b.customer_name+'\nContact: '+(b.customer_phone||'')+' / '+b.customer_email+'\nTravel date: '+b.travel_date+'\nPickup: '+(b.pickup_details||'To be confirmed')+'\nExperiences:\n'+items+'\nSpecial requests: '+(b.special_requests||'None')+'\nAgreed operator cost: '+a.currency+' '+(Number(a.operator_cost_cents)/100).toFixed(2)+'\nPlease confirm availability and acceptance.';
+ const message='MAUTAXI TOURS — TRIP REQUEST\nBooking: '+b.reference+'\nCustomer: '+b.customer_name+'\nContact: '+(b.customer_phone||'')+' / '+b.customer_email+'\nTravel date: '+b.travel_date+'\nPickup: '+(b.pickup_details||'To be confirmed')+'\nExperiences:\n'+items+'\nSpecial requests: '+(b.special_requests||'None')+'\nOperator instructions: '+(a.notes||'None')+'\nAgreed operator cost: '+a.currency+' '+(Number(a.operator_cost_cents)/100).toFixed(2)+'\nPlease confirm availability and acceptance.';
  const phone=String(a.operator.whatsapp||a.operator.phone||'').replace(/[^0-9]/g,'');
  if(!phone){alert('Add a WhatsApp number to this operator first.');return}
  window.open('https://wa.me/'+phone+'?text='+encodeURIComponent(message),'_blank','noopener');
