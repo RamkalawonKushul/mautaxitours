@@ -110,7 +110,7 @@ module Api
             completed_at: assignment.completed_at, created_at: assignment.created_at,
             operator: assignment.operator.as_json(only: %i[id name contact_person email phone whatsapp active]),
             booking: request_data, booking_operator_cost_cents: active_costs,
-            estimated_margin_cents: request_data[:total_cents].to_i - active_costs
+            estimated_margin_cents: (%w[declined cancelled reassigned].include?(assignment.status) ? nil : request_data[:total_cents].to_i - active_costs)
           }
         end
       end

@@ -76,6 +76,29 @@ class Api::V1::Admin::OperatorManagementControllerTest < ActionDispatch::Integra
     assert_response :unprocessable_entity
   end
 
+
+  test "a new operator assignment marks the previous booking assignment as reassigned" do
+    first = @booking.operator_assignments.create!(
+      operator: @operator,
+      operator_cost_cents: 20_000,
+      currency: "EUR"
+    )
+    second_operator = Operator.create!(name: "Backup Transport")
+
+    post "/api/v1/admin/operator_assignments",
+         params: { operator_assignment: {
+           booking_id: @booking.id,
+           operator_id: second_operator.id,
+           operator_cost_cents: 25_000,
+           currency: "EUR"
+         } },
+         headers: @headers,
+         as: :json
+
+    assert_response :created
+    assert_equal "reassigned", first.reload.status
+  end
+
   test "operator cannot be deleted while assignments exist" do
     @booking.operator_assignments.create!(
       operator: @operator,
