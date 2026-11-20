@@ -19,7 +19,7 @@ module Api
       end
 
       def normalized_image_url(value)
-        match = value.to_s.match(/\\A\\[([^\\]]+)\\]\\((https?:\\/\\/[^)]+)\\)\\z/)
+        match = value.to_s.match(/\A\[([^\]]+)\]\((https?:\/\/[^)]+)\)\z/)
         match ? match[2] : value
       end
     end
