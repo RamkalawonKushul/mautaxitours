@@ -354,11 +354,12 @@ async function loadReports(){
   const revenue=Array.isArray(r.revenue_by_currency)?r.revenue_by_currency:[];
   $('reportRevenue').innerHTML=revenue.length?revenue.map(x=>'<div class="crm-metric"><span>'+escapeHtml(x.currency)+'</span><b>'+escapeHtml(x.currency)+' '+(Number(x.total_cents)/100).toFixed(2)+'</b></div>').join(''):'No verified payment revenue recorded for this period.';
   const valueRows=Array.isArray(r.booking_value_by_currency)?r.booking_value_by_currency:[];
+  const assignedRows=Array.isArray(r.assigned_customer_value_by_currency)?r.assigned_customer_value_by_currency:[];
   const costRows=Array.isArray(r.operator_costs_by_currency)?r.operator_costs_by_currency:[];
   const marginRows=Array.isArray(r.estimated_margin_by_currency)?r.estimated_margin_by_currency:[];
   const outstandingRows=Array.isArray(r.operator_outstanding_by_currency)?r.operator_outstanding_by_currency:[];
   const formatTotals=rows=>rows.length?rows.map(x=>'<div class="crm-metric"><span>'+escapeHtml(x.currency)+'</span><b>'+escapeHtml(x.currency)+' '+(Number(x.total_cents)/100).toFixed(2)+'</b></div>').join(''):'<p class="crm-note">No records yet.</p>';
-  $('reportSupplierFinance').innerHTML='<b>Customer booking / transfer value</b>'+formatTotals(valueRows)+'<b>Active operator costs</b>'+formatTotals(costRows)+'<b>Estimated gross margin</b>'+formatTotals(marginRows)+'<b>Outstanding operator balances</b>'+formatTotals(outstandingRows);
+  $('reportSupplierFinance').innerHTML='<b>Total customer booking / transfer value</b>'+formatTotals(valueRows)+'<b>Value of requests assigned to operators</b>'+formatTotals(assignedRows)+'<b>Active operator costs</b>'+formatTotals(costRows)+'<b>Estimated gross margin on assigned requests</b>'+formatTotals(marginRows)+'<b>Outstanding operator balances</b>'+formatTotals(outstandingRows);
   const pct=(n,d)=>d?Math.round(n/d*100):0;
   const overviewTotal=Number(overview.bookings_total)||0,overviewConfirmed=Number(overview.bookings_confirmed)||0,overviewPaidBookings=Number(overview.paid_bookings_count)||0,overviewPayments=Number(overview.payments_paid)||0;
   $('crmBookingHealth').innerHTML='<div class="crm-metric"><span>Confirmed booking rate</span><b>'+pct(overviewConfirmed,overviewTotal)+'%</b></div><div class="crm-track"><i style="width:'+pct(overviewConfirmed,overviewTotal)+'%"></i></div><div class="crm-metric"><span>Paid booking rate</span><b>'+pct(overviewPaidBookings,overviewTotal)+'%</b></div><div class="crm-track"><i style="width:'+pct(overviewPaidBookings,overviewTotal)+'%"></i></div><div class="crm-metric"><span>Verified payment records</span><b>'+overviewPayments+'</b></div><p class="crm-note">Overview rates use all recorded bookings. Reports above use the selected reporting period.</p>';

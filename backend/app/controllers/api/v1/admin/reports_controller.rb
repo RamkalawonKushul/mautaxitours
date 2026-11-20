@@ -23,16 +23,18 @@ module Api
                                                             .where(transport_enquiry_id: transfer_enquiries.where.not(status: "cancelled").select(:id))
                                                             .where.not(status: %w[declined cancelled reassigned])
           transfer_value = active_transfer_assignments.group(:currency).sum(:customer_price_cents)
-          booking_value = booking_value.merge(transfer_value) { |_currency, booking_total, transfer_total| booking_total + transfer_total }
+          customer_value = booking_value.merge(transfer_value) { |_currency, booking_total, transfer_total| booking_total + transfer_total }
+          assigned_booking_value = active_booking_assignments.joins(:booking).group("bookings.currency").sum("bookings.total_cents")
+          assigned_customer_value = assigned_booking_value.merge(transfer_value) { |_currency, booking_total, transfer_total| booking_total + transfer_total }
           booking_costs = active_booking_assignments.group(:currency).sum(:operator_cost_cents)
           transfer_costs = active_transfer_assignments.group(:currency).sum(:operator_cost_cents)
           operator_costs = booking_costs.merge(transfer_costs) { |_currency, booking_cost, transfer_cost| booking_cost + transfer_cost }
           booking_outstanding = active_booking_assignments.group(:currency).sum("operator_cost_cents - operator_paid_cents")
           transfer_outstanding = active_transfer_assignments.group(:currency).sum("operator_cost_cents - operator_paid_cents")
           operator_outstanding = booking_outstanding.merge(transfer_outstanding) { |_currency, booking_due, transfer_due| booking_due + transfer_due }
-          finance_currencies = (booking_value.keys + operator_costs.keys).uniq.sort
+          finance_currencies = (assigned_customer_value.keys + operator_costs.keys).uniq.sort
           estimated_margin = finance_currencies.map do |currency|
-            { currency: currency, total_cents: booking_value.fetch(currency, 0) - operator_costs.fetch(currency, 0) }
+            { currency: currency, total_cents: assigned_customer_value.fetch(currency, 0) - operator_costs.fetch(currency, 0) }
           end
 
           render json: {
@@ -46,7 +48,8 @@ module Api
             failed_payments_count: apply_date_filter(Payment.where(status: "failed"), :created_at, range).count,
             refunded_payments_count: apply_date_filter(Payment.where(status: "refunded"), :created_at, range).count,
             revenue_by_currency: revenue,
-            booking_value_by_currency: booking_value.map { |currency, total| { currency: currency, total_cents: total } },
+            booking_value_by_currency: customer_value.map { |currency, total| { currency: currency, total_cents: total } },
+            assigned_customer_value_by_currency: assigned_customer_value.map { |currency, total| { currency: currency, total_cents: total } },
             operator_costs_by_currency: operator_costs.map { |currency, total| { currency: currency, total_cents: total } },
             operator_outstanding_by_currency: operator_outstanding.map { |currency, total| { currency: currency, total_cents: total } },
             estimated_margin_by_currency: estimated_margin,

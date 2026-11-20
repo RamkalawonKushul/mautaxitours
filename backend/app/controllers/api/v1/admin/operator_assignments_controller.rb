@@ -28,9 +28,10 @@ module Api
             return render json: { error: "Enter the customer selling price for this transfer before assigning an operator." }, status: :unprocessable_entity
           end
 
+          request = enquiry || booking
           assignment = nil
           OperatorAssignment.transaction do
-            enquiry.operator_assignments.where.not(status: %w[declined cancelled reassigned]).update_all(status: "reassigned", updated_at: Time.current) if enquiry
+            request.operator_assignments.where.not(status: %w[declined cancelled reassigned]).update_all(status: "reassigned", updated_at: Time.current) if request
             assignment = OperatorAssignment.new(
               attributes.except(:booking_id, :transport_enquiry_id, :operator_id, :customer_price_cents)
                          .merge(booking: booking, transport_enquiry: enquiry, operator: operator, currency: currency, customer_price_cents: customer_price)
