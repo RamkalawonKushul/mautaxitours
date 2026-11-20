@@ -1,6 +1,7 @@
 class Booking < ApplicationRecord
   has_many :booking_items, dependent: :destroy
   has_many :payments, dependent: :restrict_with_exception
+  has_many :operator_assignments, dependent: :restrict_with_error
 
   enum :status, { pending: "pending", confirmed: "confirmed", cancelled: "cancelled" }
   enum :payment_status, { unpaid: "unpaid", pending_payment: "pending_payment", paid: "paid", refunded: "refunded" }

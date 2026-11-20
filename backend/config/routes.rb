@@ -12,6 +12,8 @@ Rails.application.routes.draw do
         resources :customers, only: %i[index]
         resources :payments, only: %i[index]
         resources :transport_enquiries, path: "transfers", only: %i[index update]
+        resources :operators, only: %i[index create update destroy]
+        resources :operator_assignments, only: %i[index create update]
         resource :reports, only: %i[show]
         resources :tours, only: %i[index show create update destroy]
         resources :vehicle_options, path: "vehicles", only: %i[index create update destroy]
