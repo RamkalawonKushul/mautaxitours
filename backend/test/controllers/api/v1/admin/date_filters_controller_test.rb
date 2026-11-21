@@ -13,7 +13,7 @@ class Api::V1::Admin::DateFiltersControllerTest < ActionDispatch::IntegrationTes
   end
 
   test "bookings reject a reversed custom travel-date range" do
-    get "/api/v1/admin/bookings",
+    process :get, "/api/v1/admin/bookings",
         params: { period: "custom", start_date: "2026-12-10", end_date: "2026-12-01" },
         headers: @headers,
         as: :json
@@ -23,7 +23,7 @@ class Api::V1::Admin::DateFiltersControllerTest < ActionDispatch::IntegrationTes
   end
 
   test "transfer enquiries require both custom travel-date endpoints" do
-    get "/api/v1/admin/transfers",
+    process :get, "/api/v1/admin/transfers",
         params: { period: "custom", start_date: "2026-12-01" },
         headers: @headers,
         as: :json
@@ -33,7 +33,7 @@ class Api::V1::Admin::DateFiltersControllerTest < ActionDispatch::IntegrationTes
   end
 
   test "reports reject an invalid custom date" do
-    get "/api/v1/admin/reports",
+    process :get, "/api/v1/admin/reports",
         params: { period: "custom", start_date: "not-a-date", end_date: "2026-12-10" },
         headers: @headers,
         as: :json
@@ -43,7 +43,7 @@ class Api::V1::Admin::DateFiltersControllerTest < ActionDispatch::IntegrationTes
   end
 
   test "customer CRM rejects a reversed custom booking-date range" do
-    get "/api/v1/admin/customers",
+    process :get, "/api/v1/admin/customers",
         params: { period: "custom", start_date: "2026-12-10", end_date: "2026-12-01" },
         headers: @headers,
         as: :json
