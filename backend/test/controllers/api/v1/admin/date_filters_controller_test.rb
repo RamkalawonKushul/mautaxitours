@@ -18,7 +18,7 @@ class Api::V1::Admin::DateFiltersControllerTest < ActionDispatch::IntegrationTes
         headers: @headers,
         as: :json
 
-    assert_response :unprocessable_entity
+    assert_response :unprocessable_entity, "Unexpected response: #{response.status} #{response.body}"
     assert_match(/valid date range/i, response.parsed_body.fetch("error"))
   end
 
@@ -28,7 +28,7 @@ class Api::V1::Admin::DateFiltersControllerTest < ActionDispatch::IntegrationTes
         headers: @headers,
         as: :json
 
-    assert_response :unprocessable_entity
+    assert_response :unprocessable_entity, "Unexpected response: #{response.status} #{response.body}"
     assert_match(/valid date range/i, response.parsed_body.fetch("error"))
   end
 
@@ -38,7 +38,7 @@ class Api::V1::Admin::DateFiltersControllerTest < ActionDispatch::IntegrationTes
         headers: @headers,
         as: :json
 
-    assert_response :unprocessable_entity
+    assert_response :unprocessable_entity, "Unexpected response: #{response.status} #{response.body}"
     assert_match(/valid date range/i, response.parsed_body.fetch("error"))
   end
 
@@ -48,7 +48,7 @@ class Api::V1::Admin::DateFiltersControllerTest < ActionDispatch::IntegrationTes
         headers: @headers,
         as: :json
 
-    assert_response :unprocessable_entity
+    assert_response :unprocessable_entity, "Unexpected response: #{response.status} #{response.body}"
     assert_match(/valid date range/i, response.parsed_body.fetch("error"))
   end
 end
