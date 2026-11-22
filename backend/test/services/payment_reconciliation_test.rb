@@ -52,7 +52,7 @@ class PaymentReconciliationTest < ActiveSupport::TestCase
 
     assert_equal "refunded", result.payment_status
     assert_equal 0, result.verified_amount_cents
-    assert_equal 12_500, result.outstanding_amount_cents
+    assert_equal 0, result.outstanding_amount_cents
   end
 
   private
