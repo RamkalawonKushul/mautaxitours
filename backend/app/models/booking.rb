@@ -11,7 +11,6 @@ class Booking < ApplicationRecord
   validates :customer_email, format: { with: URI::MailTo::EMAIL_REGEXP }
   validates :idempotency_key, length: { minimum: 16, maximum: 128 }, allow_nil: true
   validates :total_cents, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
-  validates :currency, inclusion: { in: %w[MUR EUR USD GBP] }
 
   before_validation :assign_reference, on: :create
 
