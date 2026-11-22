@@ -7,7 +7,7 @@ module Api
           return if performed?
 
           bookings = apply_date_filter(Booking.all, :created_at, range)
-          verified_payments = apply_date_filter(Payment.where(status: "succeeded").where.not(paid_at: nil), :paid_at, range)
+          verified_payments = apply_date_filter(Payment.verified, :paid_at, range)
 
           revenue = verified_payments.group(:currency).sum(:amount_cents).map do |currency, total|
             { currency: currency, total_cents: total }
