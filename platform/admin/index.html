@@ -188,7 +188,7 @@ async function api(path,options={}){const response=await fetch(apiBase.replace(/
 function show(id){document.querySelectorAll('.section-view').forEach(x=>x.classList.remove('active'));$(id).classList.add('active');document.querySelectorAll('.nav a').forEach(x=>x.classList.toggle('active',x.dataset.view===id));$('pageTitle').textContent=document.querySelector('[data-view="'+id+'"] span').textContent;window.scrollTo(0,0);if(adminToken){if(id==='bookings')loadBookings();if(id==='customers')loadCustomers();if(id==='payments')loadPayments();if(id==='transfers')loadTransfers();if(id==='reports')loadReports();if(id==='operators'){loadOperators();loadAssignments()}}}
 document.querySelectorAll('.nav a').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();show(a.dataset.view)}));
 function moneyInput(cents){return cents==null?'':(Number(cents)/100).toFixed(2)}
-function wholeMoney(cents){return Math.round(Number(cents||0)/100).toLocaleString('en-US')}
+function wholeMoney(cents){return (Number(cents||0)/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}
 function cents(value){const n=Number(String(value||'').replace(/[^0-9.]/g,''));return Number.isFinite(n)?Math.round(n*100):0}
 function slugify(s){return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')}
 function durationText(minutes){return minutes?Math.floor(minutes/60)+'h'+(minutes%60?(' '+minutes%60+'m'):''):''}
