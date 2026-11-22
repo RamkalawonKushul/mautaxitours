@@ -22,7 +22,7 @@ class PaymentReconciliation
     Result.new(
       payment_status: booking.payment_status,
       verified_amount_cents: verified_amount,
-      outstanding_amount_cents: [booking.total_cents - verified_amount, 0].max
+      outstanding_amount_cents: (next_status == "refunded" ? 0 : [booking.total_cents - verified_amount, 0].max)
     )
   end
 end
