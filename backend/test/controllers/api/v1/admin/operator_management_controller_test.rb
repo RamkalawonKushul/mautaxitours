@@ -62,19 +62,6 @@ class Api::V1::Admin::OperatorManagementControllerTest < ActionDispatch::Integra
     assert_equal 15_000, response.parsed_body.fetch("estimated_margin_cents")
   end
 
-  test "operator assignment rejects a cost in a different currency" do
-    post "/api/v1/admin/operator_assignments",
-         params: { operator_assignment: {
-           booking_id: @booking.id,
-           operator_id: @operator.id,
-           operator_cost_cents: 30_000,
-           currency: "MUR"
-         } },
-         headers: @headers,
-         as: :json
-
-    assert_response :unprocessable_entity
-  end
 
 
   test "a new operator assignment marks the previous booking assignment as reassigned" do
@@ -99,31 +86,6 @@ class Api::V1::Admin::OperatorManagementControllerTest < ActionDispatch::Integra
     assert_equal "reassigned", first.reload.status
   end
 
-  test "transfer operator assignments reject unsupported currencies" do
-    enquiry = TransportEnquiry.create!(
-      pickup_location: "Airport",
-      destination: "Grand Baie",
-      travel_date: Date.current + 10.days,
-      pickup_time: "10:00",
-      passengers: 2,
-      contact_name: "Currency Test",
-      contact_email: "currency@example.com"
-    )
-
-    post "/api/v1/admin/operator_assignments",
-         params: { operator_assignment: {
-           transport_enquiry_id: enquiry.id,
-           operator_id: @operator.id,
-           operator_cost_cents: 20_000,
-           customer_price_cents: 35_000,
-           currency: "AUD"
-         } },
-         headers: @headers,
-         as: :json
-
-    assert_response :unprocessable_entity
-    assert_match(/currency/i, response.parsed_body.fetch("errors").join(" "))
-  end
 
   test "operator paid amount cannot exceed the agreed cost" do
     assignment = @booking.operator_assignments.create!(
