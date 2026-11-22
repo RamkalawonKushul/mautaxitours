@@ -7,9 +7,9 @@ module Api
           return if performed?
 
           bookings = apply_date_filter(Booking.all, :created_at, range)
-          verified_payments = apply_date_filter(Payment.verified, :paid_at, range)
+          successful_payments = apply_date_filter(Payment.where(status: "succeeded"), :paid_at, range)
 
-          revenue = verified_payments.group(:currency).sum(:amount_cents).map do |currency, total|
+          revenue = successful_payments.group(:currency).sum(:amount_cents).map do |currency, total|
             { currency: currency, total_cents: total }
           end
 
@@ -43,7 +43,7 @@ module Api
             bookings_confirmed: bookings.confirmed.count,
             bookings_cancelled: bookings.cancelled.count,
             paid_bookings_count: bookings.paid.count,
-            payments_paid: verified_payments.count,
+            payments_paid: successful_payments.count,
             unresolved_payments_count: apply_date_filter(Payment.where(status: %w[initiated awaiting_customer processing]), :created_at, range).count,
             failed_payments_count: apply_date_filter(Payment.where(status: "failed"), :created_at, range).count,
             refunded_payments_count: apply_date_filter(Payment.where(status: "refunded"), :created_at, range).count,
