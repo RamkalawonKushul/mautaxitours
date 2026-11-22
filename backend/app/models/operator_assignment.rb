@@ -11,8 +11,6 @@ class OperatorAssignment < ApplicationRecord
   validates :operator_cost_cents, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
   validates :operator_paid_cents, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
   validates :customer_price_cents, numericality: { only_integer: true, greater_than: 0 }, if: :transport_enquiry_id?
-  validates :currency, inclusion: { in: %w[MUR EUR USD GBP] }
-  validate :currency_matches_booking
   validate :exactly_one_customer_request
   validate :paid_amount_does_not_exceed_cost
 
@@ -21,11 +19,6 @@ class OperatorAssignment < ApplicationRecord
   before_validation :stamp_workflow_dates
 
   private
-
-  def currency_matches_booking
-    return unless booking && currency.present?
-    errors.add(:currency, "must match the booking currency") unless currency == booking.currency
-  end
 
   def exactly_one_customer_request
     errors.add(:base, "An assignment must belong to exactly one booking or transfer enquiry") if booking_id.present? == transport_enquiry_id.present?
