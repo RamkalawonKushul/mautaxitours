@@ -99,6 +99,48 @@ class Api::V1::Admin::OperatorManagementControllerTest < ActionDispatch::Integra
     assert_equal "reassigned", first.reload.status
   end
 
+  test "transfer operator assignments reject unsupported currencies" do
+    enquiry = TransportEnquiry.create!(
+      pickup_location: "Airport",
+      destination: "Grand Baie",
+      travel_date: Date.current + 10.days,
+      pickup_time: "10:00",
+      passengers: 2,
+      contact_name: "Currency Test",
+      contact_email: "currency@example.com"
+    )
+
+    post "/api/v1/admin/operator_assignments",
+         params: { operator_assignment: {
+           transport_enquiry_id: enquiry.id,
+           operator_id: @operator.id,
+           operator_cost_cents: 20_000,
+           customer_price_cents: 35_000,
+           currency: "AUD"
+         } },
+         headers: @headers,
+         as: :json
+
+    assert_response :unprocessable_entity
+    assert_match(/currency/i, response.parsed_body.fetch("errors").join(" "))
+  end
+
+  test "operator paid amount cannot exceed the agreed cost" do
+    assignment = @booking.operator_assignments.create!(
+      operator: @operator,
+      operator_cost_cents: 20_000,
+      currency: "EUR"
+    )
+
+    patch "/api/v1/admin/operator_assignments/#{assignment.id}",
+          params: { operator_assignment: { operator_paid_cents: 20_001 } },
+          headers: @headers,
+          as: :json
+
+    assert_response :unprocessable_entity
+    assert_equal 0, assignment.reload.operator_paid_cents
+  end
+
   test "operator cannot be deleted while assignments exist" do
     @booking.operator_assignments.create!(
       operator: @operator,
