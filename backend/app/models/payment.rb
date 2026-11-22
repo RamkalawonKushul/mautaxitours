@@ -21,7 +21,18 @@ class Payment < ApplicationRecord
   validates :provider_transaction_id, uniqueness: true, allow_nil: true
   validates :provider_payment_reference, uniqueness: true, allow_nil: true
 
+  scope :verified, -> { where(status: "succeeded").where.not(paid_at: nil) }
+
+  validate :currency_matches_booking
+
   def successful?
     succeeded? && paid_at.present?
+  end
+
+  private
+
+  def currency_matches_booking
+    return unless booking && currency.present?
+    errors.add(:currency, "must match the booking currency") unless currency == booking.currency
   end
 end
