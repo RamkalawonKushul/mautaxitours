@@ -15,8 +15,7 @@ class Api::V1::Admin::DateFiltersControllerTest < ActionDispatch::IntegrationTes
   test "bookings reject a reversed custom travel-date range" do
     get "/api/v1/admin/bookings",
         params: { period: "custom", start_date: "2026-12-10", end_date: "2026-12-01" },
-        headers: @headers,
-        as: :json
+        headers: @headers
 
     assert_response :unprocessable_entity, "Unexpected response: #{response.status} #{response.body}"
     assert_match(/valid date range/i, response.parsed_body.fetch("error"))
@@ -25,8 +24,7 @@ class Api::V1::Admin::DateFiltersControllerTest < ActionDispatch::IntegrationTes
   test "transfer enquiries require both custom travel-date endpoints" do
     get "/api/v1/admin/transfers",
         params: { period: "custom", start_date: "2026-12-01" },
-        headers: @headers,
-        as: :json
+        headers: @headers
 
     assert_response :unprocessable_entity, "Unexpected response: #{response.status} #{response.body}"
     assert_match(/valid date range/i, response.parsed_body.fetch("error"))
@@ -35,8 +33,7 @@ class Api::V1::Admin::DateFiltersControllerTest < ActionDispatch::IntegrationTes
   test "reports reject an invalid custom date" do
     get "/api/v1/admin/reports",
         params: { period: "custom", start_date: "not-a-date", end_date: "2026-12-10" },
-        headers: @headers,
-        as: :json
+        headers: @headers
 
     assert_response :unprocessable_entity, "Unexpected response: #{response.status} #{response.body}"
     assert_match(/valid date range/i, response.parsed_body.fetch("error"))
@@ -45,8 +42,7 @@ class Api::V1::Admin::DateFiltersControllerTest < ActionDispatch::IntegrationTes
   test "customer CRM rejects a reversed custom booking-date range" do
     get "/api/v1/admin/customers",
         params: { period: "custom", start_date: "2026-12-10", end_date: "2026-12-01" },
-        headers: @headers,
-        as: :json
+        headers: @headers
 
     assert_response :unprocessable_entity, "Unexpected response: #{response.status} #{response.body}"
     assert_match(/valid date range/i, response.parsed_body.fetch("error"))
