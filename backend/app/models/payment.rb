@@ -23,6 +23,7 @@ class Payment < ApplicationRecord
 
   scope :verified, -> { where(status: "succeeded").where.not(paid_at: nil) }
 
+  before_validation :normalise_currency
   validate :currency_matches_booking
 
   def successful?
@@ -30,6 +31,10 @@ class Payment < ApplicationRecord
   end
 
   private
+
+  def normalise_currency
+    self.currency = currency.to_s.upcase
+  end
 
   def currency_matches_booking
     return unless booking && currency.present?
