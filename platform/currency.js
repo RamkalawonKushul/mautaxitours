@@ -8,7 +8,7 @@ const read=key=>{try{return JSON.parse(localStorage.getItem(key)||'null')}catch(
 const write=(key,value)=>{try{localStorage.setItem(key,JSON.stringify(value))}catch(_){}};
 const valid=code=>supported.includes(String(code||'').toUpperCase());
 const getCurrency=()=>displayCurrency;
-function formatRaw(value,code){try{return new Intl.NumberFormat(undefined,{style:'currency',currency:code,minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(value||0))}catch(_){return code+' '+Number(value||0).toFixed(2)}}
+function formatRaw(value,code){try{return new Intl.NumberFormat(undefined,{style:'currency',currency:code,minimumFractionDigits:0,maximumFractionDigits:0}).format(Number(value||0))}catch(_){return code+' '+Number(value||0).toFixed(2)}}
 function convert(value,sourceCurrency){const amount=Number(value||0),source=String(sourceCurrency||'EUR').toUpperCase(),target=displayCurrency;if(!Number.isFinite(amount))return 0;if(source===target)return amount;if(!rates||!Number(rates[source])||!Number(rates[target]))return null;return amount/Number(rates[source])*Number(rates[target])}
 function format(value,sourceCurrency){const source=String(sourceCurrency||'EUR').toUpperCase(),converted=convert(value,source);return converted===null?formatRaw(value,source):formatRaw(converted,displayCurrency)}
 function notify(){const selector=document.getElementById('currencySelect');if(selector)selector.value=(function(){try{return localStorage.getItem(manualKey)||'AUTO'}catch(_){return 'AUTO'}})();document.documentElement.dataset.displayCurrency=displayCurrency;document.dispatchEvent(new CustomEvent('mautaxi:currencychange',{detail:{currency:displayCurrency,ratesAvailable:!!rates}}))}
