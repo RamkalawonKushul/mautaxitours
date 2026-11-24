@@ -285,6 +285,8 @@ if(window.MAUTAXI_API_URL){
   window.MAUTAXI_TOURS=records.map(mapLiveTour);
   const current=window.MAUTAXI_TOURS.find(item=>item.id===id);
   if(current){
+   const existingPrices=Array.isArray(t.vehiclePrices)?t.vehiclePrices:[];
+   if(!current.vehiclePrices.length&&existingPrices.length)current.vehiclePrices=existingPrices;
    sessionStorage.setItem('mautaxi_live_tour_'+id,JSON.stringify(current));
    if(typeof window.applyLiveTourData==='function')window.applyLiveTourData(current);
   }
