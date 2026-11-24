@@ -222,6 +222,8 @@ let modalReturnFocus=null;
 function showModal(id){const backdrop=document.getElementById(id);if(!document.querySelector('.modal-backdrop.open'))modalReturnFocus=document.activeElement;backdrop.classList.add('open');document.body.classList.add('modal-open');if(id==='cartBackdrop')document.getElementById('openCart').setAttribute('aria-expanded','true');const close=backdrop.querySelector('.close');if(close)close.focus()}
 function hideModal(id){const backdrop=document.getElementById(id);if(!backdrop.classList.contains('open'))return;backdrop.classList.remove('open');if(!document.querySelector('.modal-backdrop.open'))document.body.classList.remove('modal-open');if(id==='cartBackdrop')document.getElementById('openCart').setAttribute('aria-expanded','false');if(!document.querySelector('.modal-backdrop.open')){const target=id==='cartBackdrop'?modalReturnFocus:document.getElementById('openCart');if(target&&document.contains(target))target.focus();modalReturnFocus=null}}
 document.getElementById('openCart').onclick=()=>showModal('cartBackdrop');
+// Keep the existing cart control outside the header so fixed positioning works reliably.
+document.body.appendChild(document.getElementById('openCart'));
 document.getElementById('closeCart').onclick=()=>hideModal('cartBackdrop');
 document.getElementById('continueCart').onclick=()=>hideModal('cartBackdrop');
 document.getElementById('closeCheckout').onclick=()=>hideModal('checkoutBackdrop');
