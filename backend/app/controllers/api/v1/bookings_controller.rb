@@ -56,8 +56,12 @@ module Api
             adult_activity_cents = (tour.adult_price_cents || 0) * adults
             child_activity_cents = (tour.child_price_cents || 0) * children
             activity_cents = adult_activity_cents + child_activity_cents
+            baby_label = tour.baby_price_label.to_s.strip
+            baby_quote_required = babies.positive? &&
+                                  (baby_label.blank? || baby_label.match?(/quote|separately|on request|tbc/i))
             activity_quote_required = (adults.positive? && tour.adult_price_cents.nil?) ||
-                                      (children.positive? && tour.child_price_cents.nil?)
+                                      (children.positive? && tour.child_price_cents.nil?) ||
+                                      baby_quote_required
             line_total = transport_cents + upgrade_cents + activity_cents
 
             booking.booking_items.build(
