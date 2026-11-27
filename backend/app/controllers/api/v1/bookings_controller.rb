@@ -42,20 +42,22 @@ module Api
             raise ActionController::BadRequest, "Travel dates cannot be in the past" if travel_date < Date.current
 
             vehicle_name = item[:vehicle_name].to_s.strip
-            raise ActionController::BadRequest, "Please select a vehicle for every tour" if vehicle_name.blank?
-            vehicle = VehicleOption.active.find_by(name: vehicle_name)
-            raise ActionController::BadRequest, "The selected vehicle is no longer available. Please refresh and try again." unless vehicle
-            raise ActionController::BadRequest, "Selected vehicle cannot carry this group size" if vehicle.capacity < travellers
-            price = tour.tour_vehicle_prices.active.find_by(vehicle_option: vehicle)
-            raise ActionController::BadRequest, "This vehicle is not currently priced for the selected tour. Please choose another option." unless price
-            raise ActionController::BadRequest, "Vehicle price and tour activity currencies must match" unless price.currency == tour.currency
+            requested_vehicle = VehicleOption.active.find_by(name: vehicle_name) if vehicle_name.present?
+            requested_vehicle_fits = requested_vehicle.present? && requested_vehicle.capacity >= travellers
+            price = requested_vehicle_fits ? tour.tour_vehicle_prices.active.find_by(vehicle_option: requested_vehicle) : nil
+            price = nil if price && price.currency != tour.currency
 
-            transport_cents = price.price_cents
+            # A missing or unsuitable single-vehicle price becomes a quote request.
+            # Never add an unverified transport amount to the customer's booking total.
+            transport_quote_required = price.nil?
+            vehicle = price ? requested_vehicle : nil
+            transport_cents = price&.price_cents || 0
             upgrade_cents = 0
             adult_activity_cents = (tour.adult_price_cents || 0) * adults
             child_activity_cents = (tour.child_price_cents || 0) * children
             activity_cents = adult_activity_cents + child_activity_cents
-            activity_priced = tour.adult_price_cents.present? && tour.child_price_cents.present?
+            activity_quote_required = (adults.positive? && tour.adult_price_cents.nil?) ||
+                                      (children.positive? && tour.child_price_cents.nil?)
             line_total = transport_cents + upgrade_cents + activity_cents
 
             booking.booking_items.build(
@@ -68,11 +70,12 @@ module Api
               children: children,
               babies: babies,
               vehicle_option: vehicle,
-              vehicle_name: vehicle.name,
+              vehicle_name: vehicle&.name || vehicle_name.presence,
               transport_cents: transport_cents,
               vehicle_upgrade_cents: upgrade_cents,
               activity_cents: activity_cents,
-              quoted_separately: !activity_priced
+              quoted_separately: activity_quote_required,
+              transport_quote_required: transport_quote_required
             )
             total += line_total
           end
