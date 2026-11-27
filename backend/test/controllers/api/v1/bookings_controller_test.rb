@@ -68,13 +68,34 @@ class Api::V1::BookingsControllerTest < ActionDispatch::IntegrationTest
     assert_equal 12_500, response.parsed_body.fetch("items").first.fetch("transport_cents")
   end
 
-  test "rejects a vehicle without a price configured for the selected tour" do
+  test "creates a quote-required booking when the selected vehicle has no tour price" do
     @tour_vehicle_price.destroy!
-    assert_no_difference("Booking.count") do
+
+    assert_difference("Booking.count", 1) do
       post api_v1_bookings_url, params: @payload, as: :json
     end
-    assert_response :bad_request
-    assert_match(/not currently priced/i, response.parsed_body.fetch("error"))
+
+    assert_response :created
+    item = response.parsed_body.fetch("items").first
+    assert_equal true, item.fetch("transport_quote_required")
+    assert_equal 0, item.fetch("transport_cents")
+    assert_equal 5_000, response.parsed_body.fetch("total_cents")
+  end
+
+  test "creates a quote-required booking when no vehicle is selected" do
+    payload = @payload.deep_dup
+    payload[:items].first.delete(:vehicle_name)
+
+    assert_difference("Booking.count", 1) do
+      post api_v1_bookings_url, params: payload, as: :json
+    end
+
+    assert_response :created
+    item = response.parsed_body.fetch("items").first
+    assert_equal true, item.fetch("transport_quote_required")
+    assert_nil item.fetch("vehicle")
+    assert_equal 0, item.fetch("transport_cents")
+    assert_equal 5_000, response.parsed_body.fetch("total_cents")
   end
 
   test "retries with the same idempotency key do not create duplicate bookings" do
@@ -95,15 +116,18 @@ class Api::V1::BookingsControllerTest < ActionDispatch::IntegrationTest
     assert_equal reference, response.parsed_body.fetch("reference")
   end
 
-  test "rejects a vehicle that cannot carry the selected group" do
+  test "creates a quote-required booking when no single priced vehicle fits the group" do
     @payload[:items][0][:adults] = 5
 
-    assert_no_difference("Booking.count") do
+    assert_difference("Booking.count", 1) do
       post api_v1_bookings_url, params: @payload, as: :json
     end
 
-    assert_response :bad_request
-    assert_match(/cannot carry/i, response.parsed_body.fetch("error"))
+    assert_response :created
+    item = response.parsed_body.fetch("items").first
+    assert_equal true, item.fetch("transport_quote_required")
+    assert_equal 0, item.fetch("transport_cents")
+    assert_equal 4_000, response.parsed_body.fetch("total_cents")
   end
 
   test "public booking lookup does not expose customer contact details" do
