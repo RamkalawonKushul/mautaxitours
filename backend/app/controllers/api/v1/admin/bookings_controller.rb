@@ -108,6 +108,7 @@ module Api
                 vehicle_upgrade_cents: item.vehicle_upgrade_cents,
                 activity_cents: item.activity_cents,
                 quoted_separately: item.quoted_separately,
+                transport_quote_required: item.transport_quote_required,
                 line_total_cents: item.line_total_cents
               }
             end
