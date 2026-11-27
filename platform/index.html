@@ -219,13 +219,15 @@ function renderCart(){
  const homeTripCount=document.getElementById('homeTripCount');
  if(homeTripCount)homeTripCount.textContent='('+cart.length+')';
  if(!cart.length){box.innerHTML='<div class="tour-cart-empty">Your trip is empty. Add an experience to get started.</div>';summary.innerHTML='';document.getElementById('checkoutBtn').disabled=true;return}
- const transportTotals={},activityTotals={},capacityWarnings=[],transportWarnings=[];
+ const transportTotals={},activityTotals={},capacityWarnings=[],transportWarnings=[],activityWarnings=[];
  box.innerHTML=cart.map(item=>{
   const tour=tours.find(x=>x.id===item.id);if(!tour)return '';
   if(item.date&&item.date<mautaxiToday())item.date='';
   const adult=amount(tour.adult),child=amount(tour.child);
   const hasAdultPrice=!!tour.adult&&adult>0,hasChildPrice=!!tour.child&&child>0;
   const hasActivityPrice=hasAdultPrice||hasChildPrice;
+  const babyLabel=String(tour.baby||'').trim();
+  if((pax.adults>0&&!hasAdultPrice)||(pax.children>0&&!hasChildPrice)||(pax.babies>0&&(!babyLabel||/quote|separately|on request|tbc/i.test(babyLabel))))activityWarnings.push(tour.name+': some activity tickets are unpriced and will be confirmed separately.');
   const vehicle=vehicleFor(item,people);
   const transport=vehicle?vehiclePrice(tour,vehicle):0;
   const activity=(hasAdultPrice?adult*pax.adults:0)+(hasChildPrice?child*pax.children:0);
@@ -246,7 +248,6 @@ function renderCart(){
    if(hasChildPrice)parts.push(money(child,activityCurrency)+' / child');
    priceLines.push('Activity tickets: '+money(activity,activityCurrency)+' estimated ('+parts.join(' · ')+')');
   }
-  const babyLabel=String(tour.baby||'').trim();
   if(babyLabel&&!/quote|separately|on request|tbc/i.test(babyLabel))priceLines.push('Baby ticket: '+babyLabel);
   const pricedParts=[];
   if(vehicle&&transport>0)pricedParts.push(money(transport,transportCurrency));
@@ -256,7 +257,7 @@ function renderCart(){
  }).join('');
  const transportSummary=currencySummary(transportTotals),activitySummary=currencySummary(activityTotals);
  const editor='<button class="tour-cart-edit" id="cartEditToggle" type="button" aria-expanded="'+cartEditorOpen+'">Your group</button><div class="tour-cart-editor '+(cartEditorOpen?'open':'')+'" id="cartGlobalEditor"><div class="tour-cart-pax">'+[['Adults','adults',1,22],['Children','children',0,22],['Babies','babies',0,22]].map(([label,key,min,max])=>'<label>'+label+'<select data-global-pax="'+key+'">'+Array.from({length:max-min+1},(_,i)=>i+min).map(n=>'<option value="'+n+'" '+(n===pax[key]?'selected':'')+'>'+n+'</option>').join('')+'</select></label>').join('')+'</div><small>Passenger numbers apply to every experience in your trip. Vehicle type is selected automatically based on your group size.</small></div>';
- const combinedTotals={...transportTotals};Object.entries(activityTotals).forEach(([code,value])=>{combinedTotals[code]=(combinedTotals[code]||0)+value});const grandTotal=currencyTotal(combinedTotals);const hasUnpricedItems=transportWarnings.length>0||capacityWarnings.length>0;summary.innerHTML=editor+'<div class="trip-price-breakdown">'+(Object.keys(transportTotals).length?'<div class="tour-cart-summary-line"><span>Private transport</span><strong>'+transportSummary+'</strong></div>':'')+(Object.keys(activityTotals).length?'<div class="tour-cart-summary-line"><span>Activity tickets</span><strong>'+activitySummary+'</strong></div>':'')+'<div class="trip-grand-total"><div><span>Estimated total to pay</span><small>'+(grandTotal.converted?'Shown in '+grandTotal.currency:'Exchange rate unavailable · original currencies shown')+'</small></div><strong>'+(grandTotal.converted?grandTotal.label:'Not available')+'</strong></div><p class="trip-price-note">Converted estimate only. Original booking currencies are retained. '+(hasUnpricedItems?'Unpriced transport or items are not included; the final amount will be confirmed with you.':'Final amount is confirmed when availability is checked.')+'</p></div>'+(transportWarnings.length?'<small class="trip-cart-warning">'+transportWarnings.join('<br>')+'</small>':'')+(capacityWarnings.length?'<small class="trip-cart-warning">'+capacityWarnings.join('<br>')+'</small>':'');
+ const combinedTotals={...transportTotals};Object.entries(activityTotals).forEach(([code,value])=>{combinedTotals[code]=(combinedTotals[code]||0)+value});const grandTotal=currencyTotal(combinedTotals);const hasUnpricedItems=transportWarnings.length>0||capacityWarnings.length>0||activityWarnings.length>0;summary.innerHTML=editor+'<div class="trip-price-breakdown">'+(Object.keys(transportTotals).length?'<div class="tour-cart-summary-line"><span>Private transport</span><strong>'+transportSummary+'</strong></div>':'')+(Object.keys(activityTotals).length?'<div class="tour-cart-summary-line"><span>Activity tickets</span><strong>'+activitySummary+'</strong></div>':'')+'<div class="trip-grand-total"><div><span>Estimated total to pay</span><small>'+(grandTotal.converted?'Shown in '+grandTotal.currency:'Exchange rate unavailable · original currencies shown')+'</small></div><strong>'+(grandTotal.converted?grandTotal.label:'Not available')+'</strong></div><p class="trip-price-note">Converted estimate only. Original booking currencies are retained. '+(hasUnpricedItems?'Unpriced transport or items are not included; the final amount will be confirmed with you.':'Final amount is confirmed when availability is checked.')+'</p></div>'+(transportWarnings.length?'<small class="trip-cart-warning">'+transportWarnings.join('<br>')+'</small>':'')+(capacityWarnings.length?'<small class="trip-cart-warning">'+capacityWarnings.join('<br>')+'</small>':'')+(activityWarnings.length?'<small class="trip-cart-warning">'+[...new Set(activityWarnings)].join('<br>')+'</small>':'');
  document.getElementById('checkoutBtn').disabled=false;
  document.getElementById('cartEditToggle').onclick=()=>{cartEditorOpen=!cartEditorOpen;renderCart()};
  summary.querySelectorAll('[data-global-pax]').forEach(select=>select.addEventListener('change',()=>{
