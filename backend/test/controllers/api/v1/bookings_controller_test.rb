@@ -98,6 +98,16 @@ class Api::V1::BookingsControllerTest < ActionDispatch::IntegrationTest
     assert_equal 5_000, response.parsed_body.fetch("total_cents")
   end
 
+  test "marks an unpriced baby ticket as requiring a separate quote" do
+    @tour.update!(baby_price_label: "Quoted separately")
+    @payload[:items][0][:babies] = 1
+
+    post api_v1_bookings_url, params: @payload, as: :json
+
+    assert_response :created
+    assert_equal true, response.parsed_body.fetch("items").first.fetch("quoted_separately")
+  end
+
   test "retries with the same idempotency key do not create duplicate bookings" do
     post api_v1_bookings_url,
          params: @payload,
