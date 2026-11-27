@@ -287,8 +287,6 @@ document.getElementById('checkoutBtn').onclick=()=>{if(!cart.length)return;const
 document.getElementById('checkoutForm').onsubmit=async e=>{
  e.preventDefault();if(!cart.length)return;
  const data=Object.fromEntries(new FormData(e.target));data.date=data.date||cart[0]?.date||'';
- const invalidVehicle=cart.find(x=>{const p=itemPassengers(x);return !vehicleFor(x,p.adults+p.children+p.babies)});
- if(invalidVehicle){toast('Please choose a vehicle that can carry each group before submitting.');return}
  const items=cart.map(x=>{const t=tours.find(y=>y.id===x.id),p=itemPassengers(x),people=p.adults+p.children+p.babies,vehicle=vehicleFor(x,people);return {tour:t?.name||x.id,tour_id:x.id,travel_date:x.date||data.date,quantity:1,adults:p.adults,children:p.children,babies:p.babies,vehicle_name:vehicle?.vehicle_name||''}});
  const apiBase=(window.MAUTAXI_API_URL||'').replace(/\/$/,'');
  if(apiBase){
