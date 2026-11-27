@@ -1,3 +1,5 @@
+require "digest"
+
 module Api
   module V1
     class BookingsController < ApplicationController
@@ -7,7 +9,11 @@ module Api
           raise ActionController::BadRequest, "Invalid booking request key"
         end
 
+        fingerprint = booking_request_fingerprint if key.present?
         if key.present? && (existing = Booking.includes(booking_items: :tour).find_by(idempotency_key: key))
+          if existing.idempotency_fingerprint.present? && existing.idempotency_fingerprint != fingerprint
+            return render json: { error: "This booking request key has already been used for a different request." }, status: :conflict
+          end
           return render json: serialize_booking(existing), status: :ok
         end
 
@@ -18,6 +24,7 @@ module Api
 
           booking = Booking.new(booking_params)
           booking.idempotency_key = key
+          booking.idempotency_fingerprint = fingerprint
           total = 0
 
           items.each do |item|
@@ -95,7 +102,11 @@ module Api
         render json: serialize_booking(booking), status: :created
       rescue ActiveRecord::RecordNotUnique
         existing = Booking.includes(booking_items: :tour).find_by!(idempotency_key: key)
-        render json: serialize_booking(existing), status: :ok
+        if existing.idempotency_fingerprint.present? && existing.idempotency_fingerprint != fingerprint
+          render json: { error: "This booking request key has already been used for a different request." }, status: :conflict
+        else
+          render json: serialize_booking(existing), status: :ok
+        end
       rescue ActiveRecord::RecordInvalid => error
         render json: { errors: error.record.errors.full_messages }, status: :unprocessable_entity
       rescue ArgumentError, TypeError
@@ -116,6 +127,29 @@ module Api
         BookingMailer.admin_notification(booking).deliver_now if ENV["ADMIN_NOTIFICATION_EMAIL"].present?
       rescue StandardError => error
         Rails.logger.error("Booking notification failed for #{booking.reference}: #{error.class}: #{error.message}")
+      end
+
+      def booking_request_fingerprint
+        payload = {
+          booking: booking_params.to_h,
+          items: params.require(:items).map do |item|
+            item.permit(:tour_id, :travel_date, :adults, :children, :babies, :vehicle_name).to_h
+          end
+        }
+        Digest::SHA256.hexdigest(JSON.generate(sort_fingerprint_keys(payload)))
+      end
+
+      def sort_fingerprint_keys(value)
+        case value
+        when Hash
+          value.keys.sort.each_with_object({}) do |key, sorted|
+            sorted[key.to_s] = sort_fingerprint_keys(value[key])
+          end
+        when Array
+          value.map { |item| sort_fingerprint_keys(item) }
+        else
+          value
+        end
       end
 
       def integer_value(value, default)
