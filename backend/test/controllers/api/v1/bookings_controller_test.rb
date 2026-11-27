@@ -127,6 +127,21 @@ class Api::V1::BookingsControllerTest < ActionDispatch::IntegrationTest
     assert_equal reference, response.parsed_body.fetch("reference")
   end
 
+  test "rejects reusing an idempotency key for a different booking request" do
+    key = "test-booking-key-0003"
+    post api_v1_bookings_url, params: @payload, headers: { "Idempotency-Key" => key }, as: :json
+    assert_response :created
+
+    changed_payload = @payload.deep_dup
+    changed_payload[:booking][:customer_name] = "A different customer"
+    assert_no_difference("Booking.count") do
+      post api_v1_bookings_url, params: changed_payload, headers: { "Idempotency-Key" => key }, as: :json
+    end
+
+    assert_response :conflict
+    assert_match(/different request/i, response.parsed_body.fetch("error"))
+  end
+
   test "creates a quote-required booking when no single priced vehicle fits the group" do
     @payload[:items][0][:adults] = 5
 
