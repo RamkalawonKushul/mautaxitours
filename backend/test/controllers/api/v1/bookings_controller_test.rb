@@ -1,3 +1,4 @@
+# Quote-request regression coverage includes missing vehicle prices and unpriced baby tickets.
 require "test_helper"
 
 class Api::V1::BookingsControllerTest < ActionDispatch::IntegrationTest
