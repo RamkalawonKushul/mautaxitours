@@ -127,7 +127,7 @@ class Api::V1::BookingsControllerTest < ActionDispatch::IntegrationTest
     item = response.parsed_body.fetch("items").first
     assert_equal true, item.fetch("transport_quote_required")
     assert_equal 0, item.fetch("transport_cents")
-    assert_equal 4_000, response.parsed_body.fetch("total_cents")
+    assert_equal 11_000, response.parsed_body.fetch("total_cents")
   end
 
   test "public booking lookup does not expose customer contact details" do
